@@ -79,9 +79,9 @@ window.MODOS = window.MODOS || {};
 
   function enunciado(ctx) {
     const e = ctx.est;
-    const tipo = e.s.tipo === 'todos' ? 'todos los isómeros constitucionales' : `los isómeros: ${e.s.tipo}`;
-    ctx.enunciado(`<span class="etiqueta">Isómeros · Dibuja ${ctx.esc(tipo)}</span>
-      <div class="nombre-grande">${e.s.f} <small class="contador">${e.encontrados.size}/${e.s.mols.length}</small></div>`);
+    const tipo = e.s.tipo === 'todos' ? 'todos sus isómeros constitucionales' : `todos sus isómeros (${e.s.tipo})`;
+    ctx.enunciado('Isómeros', `Dibuja uno a uno ${tipo}`,
+      `${e.s.f} <small class="contador">${e.encontrados.size} de ${e.s.mols.length}</small>`);
   }
 
   function terminar(ctx, ok) {
@@ -95,6 +95,7 @@ window.MODOS = window.MODOS || {};
 
   MODOS.isomeros = {
     niveles: false,
+    SERIES,
 
     nuevo(ctx) {
       const e = ctx.est;

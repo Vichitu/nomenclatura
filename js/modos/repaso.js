@@ -35,7 +35,7 @@ window.MODOS = window.MODOS || {};
     ctx.zonas(['inicio']);
     ctx.botones({ comprobar: false, pista: false, solucion: false, siguiente: false });
     ctx.$('#progreso-repaso').hidden = true;
-    ctx.enunciado('<span class="etiqueta">Repaso general</span><div class="nombre-grande">Examen de prueba</div>');
+    ctx.enunciado('Repaso general', 'Prepárate como en un examen real', 'Examen de prueba');
     const fallos = r.ultimosFallos || [];
     ctx.$('#z-inicio').innerHTML = `
       <p>Preguntas al azar de <b>todas las secciones</b>, mezclando «dibuja la estructura» y «escribe el nombre», como en un examen real.
@@ -63,9 +63,8 @@ window.MODOS = window.MODOS || {};
     ctx.preparar(q.mol);
     r.g = ctx.orientar(q.mol._g);
     r.respondida = false;
-    ctx.feedback('');
-    ctx.$('#pistas').innerHTML = '';
-    ctx.ocultarSolucion();
+    r.intento = null;
+    ctx.limpiar();
     const barra = ctx.$('#progreso-repaso');
     barra.hidden = false;
     barra.innerHTML = `<span>Pregunta ${r.i + 1} de ${r.preguntas.length}</span>
@@ -74,11 +73,11 @@ window.MODOS = window.MODOS || {};
     ctx.botones({ comprobar: 'Comprobar', pista: false, solucion: 'No lo sé', siguiente: false });
     if (q.tipo === 'dibujar') {
       ctx.zonas(['editor']);
-      ctx.enunciado(`<span class="etiqueta">${TIPO.dibujar} · Dibuja la estructura de</span><div class="nombre-grande">${ctx.esc(q.mol.n)}</div>`);
+      ctx.enunciado(TIPO.dibujar, 'Dibuja la estructura de esta molécula', ctx.esc(q.mol.n));
       ctx.editor.reiniciar();
     } else {
       ctx.zonas(['figura', 'respuesta']);
-      ctx.enunciado(`<span class="etiqueta">${TIPO.nombrar} · ¿Cómo se llama esta molécula?</span>`);
+      ctx.enunciado(TIPO.nombrar, '¿Cómo se llama esta molécula?');
       ctx.respuesta('');
       ctx.pintarFigura(r.g);
     }
@@ -91,7 +90,8 @@ window.MODOS = window.MODOS || {};
     r.resultados.push({ ...q, ok, tipoError });
     ctx.registrar(`${q.tipo}:${q.mol.n}`, q.mol.n, ok, tipoError);
     const correcto = q.tipo === 'nombrar' && !ok ? ` La respuesta es <b>${ctx.esc(q.mol.n)}</b>.` : '';
-    ctx.feedback(html + correcto, ok ? 'bien' : 'mal');
+    const explicar = !ok && r.intento ? '<div class="fb-acciones"><button class="btn-explicar" data-explicar>¿Por qué está mal? Ver explicación</button></div>' : '';
+    ctx.feedback(html + correcto + explicar, ok ? 'bien' : 'mal');
     const ultima = r.i === r.preguntas.length - 1;
     ctx.botones({ comprobar: ultima ? 'Ver resultados →' : 'Siguiente pregunta →', solucion: false });
     ctx.mostrarSolucion(q.mol, r.g);
@@ -104,12 +104,11 @@ window.MODOS = window.MODOS || {};
     const aciertos = res.filter((x) => x.ok).length;
     const nota = ((10 * aciertos) / res.length).toFixed(1).replace('.', ',');
     r.ultimosFallos = res.filter((x) => !x.ok).map(({ mol, tipo }) => ({ mol, tipo }));
-    ctx.ocultarSolucion();
-    ctx.feedback('');
+    ctx.limpiar();
     ctx.$('#progreso-repaso').hidden = true;
     ctx.zonas(['inicio']);
     ctx.botones({ comprobar: false, pista: false, solucion: false, siguiente: false });
-    ctx.enunciado(`<span class="etiqueta">Resultado del repaso</span><div class="nombre-grande">${aciertos} de ${res.length} · nota ${nota}</div>`);
+    ctx.enunciado('Resultado del repaso', aciertos === res.length ? '¡Perfecto!' : 'Revisa abajo dónde has fallado', `${aciertos} de ${res.length} · nota ${nota}`);
 
     const porSeccion = NIVELES.map((n) => {
       const xs = res.filter((x) => x.mol.nv === n.id);
@@ -160,10 +159,12 @@ window.MODOS = window.MODOS || {};
         return;
       }
       const q = r.preguntas[r.i];
+      const intento = q.tipo === 'dibujar' ? { tipo: q.tipo, grafo: ctx.editor.grafo() } : { tipo: q.tipo, texto: ctx.respuesta() };
       const ev = q.tipo === 'dibujar'
-        ? MODOS.evaluar.dibujo(q.mol, ctx.editor.grafo())
-        : MODOS.evaluar.nombre(q.mol, ctx.respuesta(), ctx.esc);
+        ? MODOS.evaluar.dibujo(q.mol, intento.grafo)
+        : MODOS.evaluar.nombre(q.mol, intento.texto, ctx.esc);
       if (ev.aviso) { ctx.feedback(ev.aviso, 'aviso'); return; }
+      r.intento = intento;
       cerrar(ctx, ev.ok, ev.html, ev.tipo);
     },
 
@@ -171,6 +172,12 @@ window.MODOS = window.MODOS || {};
       const r = ctx.est;
       if (r.fase !== 'pregunta' || r.respondida) return;
       cerrar(ctx, false, 'Sin responder.', null);
+    },
+
+    explicar(ctx) {
+      const r = ctx.est;
+      if (r.fase !== 'pregunta' || !r.intento) return;
+      MODOS.evaluar.explicar(ctx, r.preguntas[r.i].mol, r.g, r.intento);
     },
   };
 })();

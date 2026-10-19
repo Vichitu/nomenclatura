@@ -127,8 +127,7 @@ window.MODOS = window.MODOS || {};
       e.respondida = false;
       ctx.zonas(['figura', 'opciones']);
       ctx.botones({ comprobar: false, pista: false, solucion: 'Ver solución', siguiente: 'Siguiente →' });
-      ctx.enunciado(`<span class="etiqueta">${ctx.esc(ctx.nivelNombre(e.mol.nv))} · ¿Es correcto este nombre? Si no lo es, ¿qué regla incumple?</span>
-        <div class="nombre-grande">${ctx.esc(e.q.n)}</div>`);
+      ctx.enunciado(ctx.nivelNombre(e.mol.nv), '¿Es correcto este nombre para la molécula? Si no lo es, ¿qué regla incumple?', ctx.esc(e.q.n));
       ctx.pintarFigura(e.g);
       pintarOpciones(ctx);
     },

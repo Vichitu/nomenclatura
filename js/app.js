@@ -19,6 +19,7 @@
     sustituyentes: 'Sustituyentes', estructura: 'Piezas de la estructura', isomero: 'Posición en la estructura (isómero)',
     isomeros: 'Isómeros', estereo: 'Estereoquímica (R/S, E/Z)', otro: 'Otros',
   };
+  const MODOS_MAS = { error: 'Encuentra el error', isomeros: 'Isómeros', estereo: 'Estereoquímica' };
   const ZONAS = ['editor', 'figura', 'respuesta', 'opciones', 'inicio', 'encontrados'];
   const BOTONES = { comprobar: '#btn-comprobar', pista: '#btn-pista', solucion: '#btn-solucion', siguiente: '#btn-siguiente' };
 
@@ -29,7 +30,7 @@
   let niveles = new Set((Progreso.pref('niveles') || []).filter((n) => NIVELES.some((x) => x.id === n)));
   if (!niveles.size) NIVELES.forEach((n) => niveles.add(n.id));
 
-  // Estado del ejercicio de cada modo y solución mostrada.
+  // Solución mostrada: partes del nombre ↔ átomos.
   const solucion = { partes: [], activa: null, fija: null, g: null };
 
   const ctx = {
@@ -39,6 +40,7 @@
       limpiar();
       modo.nuevo(ctx);
     },
+    limpiar,
     zonas(lista) {
       ZONAS.forEach((z) => { $(`#z-${z}`).hidden = !lista.includes(z); });
       if (lista.includes('editor')) ctx.editor._ajustarVista();
@@ -49,10 +51,20 @@
         const b = $(BOTONES[k]);
         b.hidden = v === false;
         b.disabled = false;
-        if (typeof v === 'string') b.textContent = v;
+        if (typeof v === 'string') {
+          const icono = b.querySelector('svg');
+          b.textContent = v;
+          if (icono) b.prepend(icono);
+        }
       });
     },
-    enunciado: (html) => { $('#enunciado').innerHTML = html; },
+    // tema e instrucción son texto; grande es HTML (ya escapado).
+    enunciado(tema, instruccion = '', grande = '') {
+      $('#enunciado').innerHTML = `<div class="enunciado-cab">
+          ${tema ? `<span class="insignia">${esc(tema)}</span>` : ''}
+          <span class="instruccion">${esc(instruccion)}</span></div>
+        ${grande ? `<div class="nombre-grande">${grande}</div>` : ''}`;
+    },
     feedback(html, tipo = '') {
       const f = $('#feedback');
       f.className = `feedback ${tipo}`;
@@ -63,10 +75,16 @@
       const i = $('#respuesta');
       if (v === undefined) return i.value;
       i.value = v;
-      i.focus({ preventScroll: true });
+      if (window.matchMedia('(min-width: 760px)').matches) i.focus({ preventScroll: true });
       return v;
     },
     pintarFigura: (g, o = {}) => Quimica.pintarEn($('#figura'), g, o),
+    explicacion(html) {
+      const s = $('#explicacion');
+      s.innerHTML = html;
+      s.hidden = false;
+      return s;
+    },
     nivelNombre: (id) => NIVELES.find((n) => n.id === id)?.nombre || '',
     niveles: () => niveles,
 
@@ -98,10 +116,12 @@
       recientes.push(clave(it));
       return it;
     },
-    registrar(clave, id, ok, tipoError) {
+    // ok: para el repaso espaciado (acertado a la primera).
+    // resuelto: para el marcador de la sesión (acertado, aunque sea tras varios intentos).
+    registrar(clave, id, ok, tipoError, resuelto = ok) {
       Progreso.registrar(clave, id, ok, tipoError);
       sesion.total++;
-      if (ok) { sesion.ok++; sesion.racha++; } else sesion.racha = 0;
+      if (resuelto) { sesion.ok++; sesion.racha++; } else sesion.racha = 0;
       pintarMarcador();
       pintarNiveles();
     },
@@ -114,10 +134,12 @@
     ctx.feedback('');
     $('#pistas').innerHTML = '';
     $('#solucion').hidden = true;
+    $('#explicacion').hidden = true;
+    $('#explicacion').innerHTML = '';
   }
 
   // ───────── Solución: nombre troceado ↔ átomos ─────────
-  function mostrarSolucion(m, g) {
+  function mostrarSolucion(m, g, { desplazar = true } = {}) {
     const ref = m.sis || m.n;
     const partes = Nombre.segmentar(ref);
     const res = Nombre.resaltados(partes, g);
@@ -135,14 +157,14 @@
     $('#nombre-partes').innerHTML = partes.map((p, k) => {
       const s = solucion.partes[k];
       if (!s) return `<span class="sep">${esc(p.t)}</span>`;
-      return `<button class="parte" data-i="${k}" style="--c:${s.color}"><span class="txt">${esc(p.t)}</span><small>${ETIQUETA_PARTE[p.k]}</small></button>`;
+      return `<button class="parte" data-i="${k}" style="--c:${s.color}" aria-pressed="false"><span class="txt">${esc(p.t)}</span><small>${ETIQUETA_PARTE[p.k]}</small></button>`;
     }).join('');
     $('#pasos').innerHTML = Nombre.pasos(m, g).map((p) => `<li>${p}</li>`).join('');
     $('#nota').hidden = !m.nota;
     $('#nota').innerHTML = m.nota ? `<b>Ojo:</b> ${esc(m.nota)}` : '';
     $('#solucion').hidden = false;
     pintarSolucion();
-    if ($('#z-editor').hidden === false) $('#solucion').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (desplazar && !$('#z-editor').hidden) $('#solucion').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   function pintarSolucion() {
@@ -155,10 +177,11 @@
     document.querySelectorAll('#nombre-partes .parte').forEach((b) => {
       b.classList.toggle('activa', +b.dataset.i === activa);
       b.classList.toggle('apagada', activa != null && +b.dataset.i !== activa);
+      b.setAttribute('aria-pressed', String(+b.dataset.i === solucion.fija));
     });
   }
 
-  // ───────── Cabecera, niveles y modos ─────────
+  // ───────── Cabecera, temas y modos ─────────
   function pintarMarcador() {
     $('#racha').textContent = sesion.racha;
     $('#sesion').textContent = `${sesion.ok}/${sesion.total}`;
@@ -172,11 +195,13 @@
       const mols = MOLECULAS.filter((m) => m.nv === n.id);
       const dominadas = mols.filter((m) => Progreso.caja(`dibujar:${m.n}`) >= 2 || Progreso.caja(`nombrar:${m.n}`) >= 2).length;
       const on = niveles.has(n.id);
-      return `<button class="chip ${on ? 'on' : ''}" data-nv="${n.id}" aria-pressed="${on}">
-        ${esc(n.nombre)} <span class="progreso" title="Moléculas dominadas (acertadas al menos dos veces seguidas)">${dominadas}/${mols.length}</span></button>`;
+      return `<button class="chip ${on ? 'on' : ''}" data-nv="${n.id}" aria-pressed="${on}"
+        title="${dominadas} de ${mols.length} moléculas dominadas (acertadas a la primera dos veces seguidas)">
+        ${on ? '✓ ' : ''}${esc(n.nombre)} <span class="progreso">${dominadas}/${mols.length}</span></button>`;
     }).join('');
     const todos = niveles.size === NIVELES.length;
-    $('#niveles').innerHTML = html + `<button class="chip todos" data-nv="*">${todos ? 'Solo uno…' : 'Todos'}</button>`;
+    $('#niveles').innerHTML = html + `<button class="chip todos" data-nv="*">${todos ? 'Elegir solo uno' : 'Todos los temas'}</button>`;
+    $('#temas-resumen').textContent = todos ? 'todos incluidos' : `${niveles.size} de ${NIVELES.length} incluidos`;
   }
 
   function alternarNivel(id) {
@@ -192,14 +217,27 @@
     if (!niveles.has(ctx.est.mol?.nv)) ctx.nuevo();
   }
 
+  function abrirMenu(abrir) {
+    $('#menu-mas').hidden = !abrir;
+    $('#btn-mas').setAttribute('aria-expanded', String(abrir));
+    if (abrir) $('#menu-mas button').focus();
+  }
+
   function ponerModo(nombre) {
     if (!MODOS[nombre] || !MODOS[nombre].nuevo) nombre = 'dibujar';
     nombreModo = nombre;
     modo = MODOS[nombre];
     ctx.est = {};
-    document.querySelectorAll('.modos button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.modo === nombre)));
-    $('#niveles').hidden = !modo.niveles;
+    document.querySelectorAll('[data-modo]').forEach((b) => {
+      b.classList.toggle('activo', b.dataset.modo === nombre);
+      b.setAttribute('aria-current', b.dataset.modo === nombre ? 'true' : 'false');
+    });
+    const extra = MODOS_MAS[nombre];
+    $('#btn-mas').classList.toggle('activo', !!extra);
+    $('#mas-titulo').textContent = extra || 'Más ejercicios';
+    $('#temas').hidden = !modo.niveles;
     $('#progreso-repaso').hidden = true;
+    abrirMenu(false);
     Progreso.pref('modo', nombre);
     ctx.nuevo();
   }
@@ -208,15 +246,23 @@
     const grupos = {};
     Object.entries(Editor.HERRAMIENTAS).forEach(([id, h]) => { (grupos[h.grupo] = grupos[h.grupo] || []).push([id, h]); });
     $('#paleta').innerHTML = Object.entries(grupos).map(([g, hs]) => `
-      <div class="grupo-paleta"><span>${g}</span><div>
-        ${hs.map(([id, h]) => `<button class="pieza ${id.length <= 2 ? 'el-' + id : ''}" data-h="${id}" title="${esc(h.titulo)}">${esc(h.et)}</button>`).join('')}
+      <div class="grupo-paleta" role="group" aria-label="${g}"><span>${g}</span><div>
+        ${hs.map(([id, h]) => `<button class="pieza ${id.length <= 2 ? 'el-' + id : ''}" data-h="${id}" title="${esc(h.titulo)}" aria-label="${esc(h.titulo)}" aria-pressed="false">${esc(h.et)}</button>`).join('')}
       </div></div>`).join('');
     elegirHerramienta('C');
   }
 
   function elegirHerramienta(id) {
     ctx.editor.usar(id);
-    document.querySelectorAll('.pieza').forEach((b) => b.classList.toggle('on', b.dataset.h === id));
+    document.querySelectorAll('.pieza').forEach((b) => {
+      b.classList.toggle('on', b.dataset.h === id);
+      b.setAttribute('aria-pressed', String(b.dataset.h === id));
+    });
+  }
+
+  function bienvenida(mostrar) {
+    $('#bienvenida').hidden = !mostrar;
+    if (!mostrar) Progreso.pref('bienvenida', true);
   }
 
   // ───────── Arranque ─────────
@@ -224,18 +270,20 @@
     try {
       await Quimica.iniciar();
     } catch (e) {
-      $('#cargando').textContent = 'No se pudo cargar RDKit. Comprueba la conexión a internet y recarga la página.';
+      $('#cargando').textContent = 'No se pudo cargar el motor químico (RDKit). Comprueba la conexión a internet y recarga la página.';
       return;
     }
     $('#cargando').remove();
     Progreso.persistir();
 
     ctx.editor = new Editor.Editor($('#lienzo'), {
-      alCambiar: () => { if (!$('#feedback').classList.contains('bien')) ctx.feedback(''); },
+      alCambiar: () => { if ($('#feedback').classList.contains('aviso')) ctx.feedback(''); },
     });
     pintarPaleta();
     pintarNiveles();
     pintarMarcador();
+    if (window.matchMedia('(min-width: 760px)').matches) $('#temas').open = true;
+    bienvenida(!Progreso.pref('bienvenida'));
 
     MOLECULAS.forEach((m) => {
       ctx.preparar(m);
@@ -244,7 +292,9 @@
 
     $('#paleta').addEventListener('click', (e) => { const b = e.target.closest('.pieza'); if (b) elegirHerramienta(b.dataset.h); });
     $('#niveles').addEventListener('click', (e) => { const b = e.target.closest('.chip'); if (b) alternarNivel(b.dataset.nv); });
-    document.querySelectorAll('.modos button').forEach((b) => b.addEventListener('click', () => ponerModo(b.dataset.modo)));
+    document.querySelectorAll('[data-modo]').forEach((b) => b.addEventListener('click', () => ponerModo(b.dataset.modo)));
+    $('#btn-mas').addEventListener('click', () => abrirMenu($('#menu-mas').hidden));
+    document.addEventListener('click', (e) => { if (!e.target.closest('.mas')) abrirMenu(false); });
     $('#btn-comprobar').addEventListener('click', () => modo.comprobar?.(ctx));
     $('#btn-pista').addEventListener('click', () => modo.pista?.(ctx));
     $('#btn-solucion').addEventListener('click', () => modo.solucion?.(ctx));
@@ -252,10 +302,14 @@
     $('#btn-deshacer').addEventListener('click', () => ctx.editor.deshacer());
     $('#btn-centrar').addEventListener('click', () => ctx.editor.centrar());
     $('#btn-limpiar').addEventListener('click', () => ctx.editor.limpiar());
+    $('#btn-bienvenida').addEventListener('click', () => bienvenida(false));
+    $('#btn-ver-bienvenida').addEventListener('click', () => { bienvenida(true); $('#bienvenida').scrollIntoView({ behavior: 'smooth' }); });
     $('#respuesta').addEventListener('keydown', (e) => { if (e.key === 'Enter') modo.comprobar?.(ctx); });
+    $('#feedback').addEventListener('click', (e) => { if (e.target.closest('[data-explicar]')) modo.explicar?.(ctx); });
     $('#z-opciones').addEventListener('click', (e) => { const b = e.target.closest('[data-opcion]'); if (b) modo.opcion?.(ctx, b.dataset.opcion, b); });
     $('#z-inicio').addEventListener('click', (e) => { const b = e.target.closest('[data-accion]'); if (b) modo.accion?.(ctx, b.dataset.accion, b); });
     document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !$('#menu-mas').hidden) { abrirMenu(false); $('#btn-mas').focus(); }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !$('#z-editor').hidden && document.activeElement !== $('#respuesta')) {
         e.preventDefault();
         ctx.editor.deshacer();

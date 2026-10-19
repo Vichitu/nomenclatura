@@ -48,6 +48,13 @@ const Progreso = (() => {
     guardar();
   }
 
+  // Un intento fallido dentro de un ejercicio que aún no ha terminado.
+  function anotarError(tipoError) {
+    if (!tipoError) return;
+    d.errores[tipoError] = (d.errores[tipoError] || 0) + 1;
+    guardar();
+  }
+
   const vencido = (clave, ahora = Date.now()) => !!d.srs[clave] && d.srs[clave].proxima <= ahora;
   const caja = (clave) => d.srs[clave]?.caja || 0;
   const azar = (a) => a[Math.floor(Math.random() * a.length)];
@@ -72,7 +79,7 @@ const Progreso = (() => {
   const pendientes = (items, claveDe) => items.filter((x) => vencido(claveDe(x))).length;
 
   return {
-    registrar, elegir, pendientes, caja, persistir,
+    registrar, anotarError, elegir, pendientes, caja, persistir,
     stats: () => d.stats,
     errores: () => d.errores,
     pref: (k, v) => {

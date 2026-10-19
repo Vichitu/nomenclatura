@@ -382,5 +382,130 @@ const Nombre = (() => {
     return { estado: 'mal', mensajes, trozos, tipo };
   }
 
-  return { segmentar, resaltados, pasos, pistas, diagnostico, normalizar, aceptados, nombreSust };
+  // ───────── Comparación detallada: qué hay que cambiar de `texto` para llegar a `ref` ─────────
+  const NUM_PREFIJO = { hept: 7, pent: 5, prop: 3, oct: 8, non: 9, dec: 10, but: 4, hex: 6, met: 1, et: 2 };
+  const cs = (locs) => locs.map((l) => (l === 'N' ? 'el N' : `C${l}`)).join(', ');
+
+  function cadenaDe(p) {
+    const t = normalizar(p.t);
+    const sinCiclo = t.replace(/^ciclo/, '');
+    if (/^(benc|benz|fen)/.test(sinCiclo)) return { n: 6, anillo: true };
+    const k = Object.keys(NUM_PREFIJO).find((x) => sinCiclo.startsWith(x));
+    return k ? { n: NUM_PREFIJO[k], anillo: t.startsWith('ciclo') } : null;
+  }
+
+  function mapaSustituyentes(partes) {
+    const m = new Map();
+    partes.filter((p) => p.k === 'sust').forEach((p) => {
+      const base = normalizar(p.base);
+      const v = m.get(base) || { locs: [], partes: [] };
+      const n = p.locs.length || MULT_N[p.mult] || 1;
+      v.locs.push(...(p.locs.length ? p.locs : Array(n).fill('?')));
+      v.partes.push(p);
+      m.set(base, v);
+    });
+    return m;
+  }
+
+  // Letra que decide el orden alfabético (sin terc-, sec-, n-).
+  const letraOrden = (base) => base.replace(/^(terc|tert|sec|n)-/, '').replace(/^\(/, '');
+
+  function comparar(texto, ref) {
+    const util = (s) => segmentar(s).filter((p) => p.k !== 'sep' && p.k !== 'texto');
+    const pu = util(texto), pc = util(ref);
+    const dif = [];
+
+    // 1. Grupo principal
+    const grupoDe = (ps) => ps.find((p) => p.k === 'acido') || ps.find((p) => p.k === 'suf');
+    const gu = grupoDe(pu), gc = grupoDe(pc);
+    const formatoAntiguo = pu.some((p) => p.k === 'cadena' && p.locs.length);
+    if (formatoAntiguo) {
+      dif.push('<b>Formato:</b> estás usando la nomenclatura antigua (2-pentanol). Ahora cada localizador va justo delante de lo que indica: pentan-2-ol.');
+    }
+    if (gu?.tipo !== gc?.tipo) {
+      if (gc) {
+        dif.push(`<b>Grupo principal:</b> el grupo de mayor prioridad es: ${GRUPO[gc.tipo].nombre}, así que el nombre se construye con ${GRUPO[gc.tipo].como}`
+          + (gu ? `, no con el sufijo de ${GRUPO[gu.tipo].nombre}. Los demás grupos se nombran como prefijos.` : '.'));
+      } else {
+        dif.push(`<b>Grupo principal:</b> la molécula correcta no tiene el grupo ${GRUPO[gu.tipo].nombre}, así que su nombre no lleva ese sufijo. (Los halógenos, los éteres y los alquilos van siempre como prefijos.)`);
+      }
+    } else if (gc && gc.locs.length && gc.locs.join() !== gu.locs.join() && !formatoAntiguo) {
+      dif.push(`<b>Localizador del grupo principal:</b> el grupo ${GRUPO[gc.tipo].nombre} está en ${cs(gc.locs)}${gu.locs.length ? `, no en ${cs(gu.locs)}` : ''}. Numera desde el extremo que le dé el número más bajo.`);
+    }
+
+    // 2. Cadena principal
+    const cu = pu.find((p) => p.k === 'cadena'), cc = pc.find((p) => p.k === 'cadena');
+    const nu = cu && cadenaDe(cu), nc = cc && cadenaDe(cc);
+    if (nu && nc && nu.n !== nc.n) {
+      dif.push(`<b>Cadena principal:</b> tiene ${nc.n} carbonos («${PREFIJO[nc.n]}-»), no ${nu.n} («${PREFIJO[nu.n]}-»).`
+        + (nc.anillo ? '' : ' Debe contener el grupo principal y, después, ser la más larga posible.'));
+    } else if (nu && nc && nu.anillo !== nc.anillo) {
+      dif.push(nc.anillo ? '<b>Cadena principal:</b> es un anillo, así que lleva el prefijo «ciclo-».' : '<b>Cadena principal:</b> es una cadena abierta: no lleva «ciclo-».');
+    }
+
+    // 3. Insaturaciones
+    const insat = (ps) => ps.filter((p) => p.k === 'insat').map((p) => ({ t: normalizar(p.t).replace(/^[\d,]+-/, '').replace(/o$/, ''), locs: p.locs }));
+    const iu = insat(pu), ic = insat(pc);
+    const descInsat = (i) => `${i.t.includes('in') ? 'triple' : 'doble'} enlace${i.locs.length ? ` en ${cs(i.locs)}` : ''}`;
+    const claveInsat = (i) => `${i.t}@${i.locs.join()}`;
+    if (iu.map(claveInsat).join('|') !== ic.map(claveInsat).join('|')) {
+      if (!ic.length) dif.push('<b>Insaturaciones:</b> la cadena principal no tiene dobles ni triples enlaces, así que la terminación es «-ano».');
+      else if (!iu.length) dif.push(`<b>Insaturaciones:</b> falta indicar el ${ic.map(descInsat).join(' y el ')}.`);
+      else dif.push(`<b>Insaturaciones:</b> debe ser ${ic.map(descInsat).join(' y ')}, no ${iu.map(descInsat).join(' y ')}. El localizador indica el primer carbono del enlace múltiple.`);
+    }
+
+    // 4. Sustituyentes y sus localizadores
+    const su = mapaSustituyentes(pu), sc = mapaSustituyentes(pc);
+    sc.forEach((v, base) => {
+      const u = su.get(base);
+      const conLocs = v.locs[0] !== '?';
+      if (!u) {
+        dif.push(`<b>Sustituyentes:</b> falta «${base}»${conLocs ? ` en ${cs(v.locs)}` : ''}.`);
+      } else if (v.locs.length !== u.locs.length) {
+        dif.push(`<b>Sustituyentes:</b> hay ${v.locs.length} grupo${v.locs.length > 1 ? 's' : ''} «${base}»${conLocs ? ` (${cs(v.locs)})` : ''}, no ${u.locs.length}.`);
+      } else if (v.locs.join() !== u.locs.join()) {
+        dif.push(`<b>Localizadores:</b> «${base}» va en ${cs(v.locs)}, no en ${cs(u.locs)}.`);
+      } else if (v.locs.length > 1 && (u.partes.length > 1 || (u.partes[0].mult || '') !== (v.partes[0].mult || ''))) {
+        dif.push(`<b>Multiplicadores:</b> con ${v.locs.length} grupos «${base}» se escribe todo junto con el multiplicador: «${v.partes[0].t}».`);
+      }
+    });
+    su.forEach((v, base) => {
+      if (!sc.has(base)) dif.push(`<b>Sustituyentes:</b> «${base}» no aparece en el nombre correcto${nu && nc && nu.n !== nc.n ? ' (con la cadena principal correcta, ese grupo forma parte de la cadena o cambia)' : ''}.`);
+    });
+
+    // 5. Éster
+    const eu = pu.find((p) => p.k === 'ester'), ec = pc.find((p) => p.k === 'ester');
+    if (ec && (!eu || normalizar(eu.t) !== normalizar(ec.t))) {
+      dif.push(`<b>Éster:</b> el grupo unido al oxígeno se nombra al final: «${normalizar(ec.t).trim()}».`);
+    }
+
+    // 6. Orden alfabético (solo si todo lo demás está bien)
+    const ordenU = pu.filter((p) => p.k === 'sust').map((p) => normalizar(p.base));
+    const ordenC = pc.filter((p) => p.k === 'sust').map((p) => normalizar(p.base));
+    if (!dif.length && ordenU.slice().sort().join() === ordenC.slice().sort().join() && ordenU.join() !== ordenC.join()) {
+      const resalta = (b) => { const l = letraOrden(b); const i = b.indexOf(l); return `${b.slice(0, i)}<b><u>${l[0]}</u></b>${l.slice(1)}`; };
+      dif.push(`<b>Orden alfabético:</b> los sustituyentes se citan por orden alfabético, sin contar los multiplicadores (di-, tri-…) ni terc-/sec-: ${ordenC.map(resalta).join(' → ')}.`);
+    }
+
+    // 7. Formato
+    if (!dif.length) {
+      const sinGuiones = (x) => normalizar(x).replace(/[-\s]/g, '');
+      if (sinGuiones(texto) === sinGuiones(ref)) dif.push('<b>Guiones:</b> el guion separa números de letras («3-metil»); entre dos palabras unidas no se pone, y los números se separan con comas.');
+      else dif.push('<b>Escritura:</b> revisa la ortografía comparando tu nombre con el correcto.');
+    }
+    return dif;
+  }
+
+  // Nombre correcto con las partes que había que cambiar marcadas.
+  function marcarCorreccion(texto, ref) {
+    const pu = segmentar(texto).filter((p) => p.k !== 'sep');
+    const locs = (p) => p.locs.join(',');
+    return segmentar(ref).map((p) => {
+      if (p.k === 'sep') return { t: p.t, estado: 'sep' };
+      const iguales = pu.filter((q) => nucleo(q) === nucleo(p));
+      return { t: p.t, estado: iguales.some((q) => locs(q) === locs(p)) ? 'bien' : 'cambia' };
+    });
+  }
+
+  return { segmentar, resaltados, pasos, pistas, diagnostico, normalizar, aceptados, nombreSust, comparar, marcarCorreccion };
 })();

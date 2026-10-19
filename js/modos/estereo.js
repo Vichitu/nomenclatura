@@ -296,7 +296,7 @@ window.MODOS = window.MODOS || {};
       ctx.botones({ comprobar: 'Comprobar', pista: 'Pista', solucion: 'Ver solución', siguiente: 'Siguiente →' });
       const hay = e.q.elementos.map((x) => x.tipo);
       const que = [hay.includes('centro') ? 'R o S a cada carbono quiral' : '', hay.includes('doble') ? 'E o Z a cada doble enlace' : ''].filter(Boolean).join(' y ');
-      ctx.enunciado(`<span class="etiqueta">Estereoquímica · Asigna ${que}</span><div class="nombre-grande">${ctx.esc(dato.n)}</div>`);
+      ctx.enunciado('Estereoquímica', `Asigna ${que}`, ctx.esc(dato.n));
       pintar(ctx, false);
       pintarOpciones(ctx);
     },
