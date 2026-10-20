@@ -88,7 +88,7 @@ window.MODOS = window.MODOS || {};
     const e = ctx.est;
     if (!e.contado) {
       e.contado = true;
-      ctx.registrar(clave(e.s), null, ok, ok ? null : 'isomeros');
+      ctx.registrar(clave(e.s), null, ok, ok ? null : 'isomeros', false);
     }
     ctx.botones({ comprobar: false, pista: false, solucion: false });
   }
@@ -118,13 +118,15 @@ window.MODOS = window.MODOS || {};
       const can = Quimica.canonico(Quimica.aMolblock(g));
       const formula = Quimica.formula(g);
       if (formula !== e.s.formula) {
+        ctx.intento(false);
         ctx.feedback(`Tu molécula es <b>${formula}</b>, pero se pide <b>${e.s.formula}</b>. Cuenta los átomos (los H no se dibujan, se deducen).`, 'mal');
         return;
       }
       const m = e.s.mols.find((x) => x.can === can);
       if (!m) {
         const motivo = e.s.sinAnillos && Quimica.contarCoincidencias(can, '[R]') ? 'tiene un anillo y aquí solo cuentan las cadenas abiertas' : `no es del tipo pedido (${e.s.tipo})`;
-        ctx.feedback(`Es un isómero de ${e.s.formula}, pero ${motivo}.`, 'aviso');
+        ctx.intento(false);
+        ctx.feedback(`Es un isómero de ${e.s.formula}, pero ${motivo}.`, 'mal');
         return;
       }
       if (e.encontrados.has(can)) {
@@ -132,6 +134,7 @@ window.MODOS = window.MODOS || {};
         return;
       }
       e.encontrados.add(can);
+      ctx.intento(true);
       ctx.editor.reiniciar();
       enunciado(ctx);
       pintarLista(ctx);
@@ -155,6 +158,7 @@ window.MODOS = window.MODOS || {};
     solucion(ctx) {
       const e = ctx.est;
       e.rendido = true;
+      if (!e.contado) ctx.intento(false);
       pintarLista(ctx);
       ctx.feedback(`Te faltaban ${e.s.mols.length - e.encontrados.size}. Los tienes abajo marcados.`, 'aviso');
       terminar(ctx, false);

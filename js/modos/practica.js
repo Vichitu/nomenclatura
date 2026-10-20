@@ -199,12 +199,13 @@ window.MODOS = window.MODOS || {};
       ctx.pintarFigura(e.g, { resaltes, locantes: e.verNumeros });
     }
 
-    // Cada ejercicio cuenta una sola vez, al terminarlo.
+    // El marcador de la sesión cuenta cada intento (ctx.intento). Aquí se guarda el
+    // resultado del ejercicio para el repaso espaciado: solo vale si se acertó a la primera.
     function terminar(ctx, resuelto) {
       const e = ctx.est;
       if (e.terminado) return;
       e.terminado = true;
-      ctx.registrar(clave(e.mol), e.mol.n, resuelto && e.intentos === 0, null, resuelto);
+      ctx.registrar(clave(e.mol), e.mol.n, resuelto && e.intentos === 0, null, false);
       ctx.botones({ comprobar: 'Siguiente ejercicio →', pista: false, solucion: false, siguiente: false });
     }
 
@@ -244,6 +245,7 @@ window.MODOS = window.MODOS || {};
         const intento = intentoActual(ctx);
         const r = tipo === 'dibujar' ? evaluarDibujo(e.mol, intento.grafo) : evaluarNombre(e.mol, intento.texto, ctx.esc);
         if (r.aviso) { ctx.feedback(r.aviso, 'aviso'); return; }
+        ctx.intento(r.ok);
         if (r.ok) {
           const extra = e.intentos ? ` <span class="intentos">(al ${e.intentos + 1}.º intento)</span>` : '';
           terminar(ctx, true);
@@ -279,6 +281,7 @@ window.MODOS = window.MODOS || {};
 
       solucion(ctx) {
         const e = ctx.est;
+        if (!e.terminado && e.intentos === 0) ctx.intento(false); // rendirse sin intentarlo cuenta como fallo
         terminar(ctx, false);
         if (tipo === 'nombrar') ctx.feedback(`La respuesta es <b>${ctx.esc(e.mol.n)}</b>.`, 'aviso');
         else ctx.feedback('Aquí tienes la estructura correcta: compárala con la tuya.', 'aviso');

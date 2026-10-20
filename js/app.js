@@ -116,14 +116,19 @@
       recientes.push(clave(it));
       return it;
     },
-    // ok: para el repaso espaciado (acertado a la primera).
-    // resuelto: para el marcador de la sesión (acertado, aunque sea tras varios intentos).
-    registrar(clave, id, ok, tipoError, resuelto = ok) {
+    // Resultado del ejercicio para el progreso (repaso espaciado y temas dominados).
+    // Con contarIntento = true también suma un intento al marcador de la sesión.
+    registrar(clave, id, ok, tipoError, contarIntento = true) {
       Progreso.registrar(clave, id, ok, tipoError);
-      sesion.total++;
-      if (resuelto) { sesion.ok++; sesion.racha++; } else sesion.racha = 0;
+      if (contarIntento) ctx.intento(ok);
       pintarMarcador();
       pintarNiveles();
+    },
+    // Un intento en el marcador de la sesión: cada «Comprobar» cuenta, acierte o falle.
+    intento(ok) {
+      sesion.total++;
+      if (ok) { sesion.ok++; sesion.racha++; } else sesion.racha = 0;
+      pintarMarcador();
     },
 
     mostrarSolucion,
