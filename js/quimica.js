@@ -124,25 +124,44 @@ const Quimica = (() => {
     return L.join('\n');
   }
 
-  // Escala a longitud de enlace 1, gira el eje principal a horizontal y lleva a origen.
-  function normalizar(g) {
-    if (!g.atoms.length) return g;
-    if (g.bonds.length) {
-      const media = g.bonds.reduce((s, b) => s + Math.hypot(g.atoms[b.a].x - g.atoms[b.b].x, g.atoms[b.a].y - g.atoms[b.b].y), 0) / g.bonds.length;
-      if (media > 0) g.atoms.forEach((a) => { a.x /= media; a.y /= media; });
-    }
-    const n = g.atoms.length;
-    const cx = g.atoms.reduce((s, a) => s + a.x, 0) / n;
-    const cy = g.atoms.reduce((s, a) => s + a.y, 0) / n;
-    let sxx = 0, syy = 0, sxy = 0;
-    g.atoms.forEach((a) => { const x = a.x - cx, y = a.y - cy; sxx += x * x; syy += y * y; sxy += x * y; });
-    const th = 0.5 * Math.atan2(2 * sxy, sxx - syy);
-    const c = Math.cos(-th), s = Math.sin(-th);
+  function girar(g, t) {
+    const c = Math.cos(t), s = Math.sin(t);
     g.atoms.forEach((a) => {
-      const x = a.x - cx, y = a.y - cy;
+      const x = a.x, y = a.y;
       a.x = x * c - y * s;
       a.y = x * s + y * c;
     });
+  }
+
+  // Escala a longitud de enlace 1 y gira la molécula como en los dibujos de los apuntes:
+  // enlaces en múltiplos de 30° (zigzag horizontal, anillos derechos) y, de los giros
+  // posibles, el que la deja más ancha que alta. Después la lleva al origen.
+  function normalizar(g) {
+    if (!g.atoms.length) return g;
+    if (!g.bonds.length) return aOrigen(g);
+    const largo = (b) => Math.hypot(g.atoms[b.a].x - g.atoms[b.b].x, g.atoms[b.a].y - g.atoms[b.b].y);
+    const media = g.bonds.reduce((s, b) => s + largo(b), 0) / g.bonds.length;
+    if (media > 0) g.atoms.forEach((a) => { a.x /= media; a.y /= media; });
+
+    // Ángulo que mejor encaja los enlaces en la rejilla de 30°: sin(6·φ) = 0 en cada múltiplo.
+    const angulos = g.bonds.map((b) => Math.atan2(g.atoms[b.b].y - g.atoms[b.a].y, g.atoms[b.b].x - g.atoms[b.a].x));
+    let base = 0, mejor = Infinity;
+    for (let grados = 0; grados < 30; grados += 0.25) {
+      const t = (grados * Math.PI) / 180;
+      const error = angulos.reduce((s, f) => s + Math.sin(6 * (f + t)) ** 2, 0);
+      if (error < mejor - 1e-9) { mejor = error; base = t; }
+    }
+
+    // Entre los 12 giros equivalentes (cada 30°), el más apaisado.
+    let giro = base, proporcion = -Infinity;
+    for (let k = 0; k < 12; k++) {
+      const t = base + (k * Math.PI) / 6;
+      const c = Math.cos(t), s = Math.sin(t);
+      const xs = g.atoms.map((a) => a.x * c - a.y * s), ys = g.atoms.map((a) => a.x * s + a.y * c);
+      const p = (Math.max(...xs) - Math.min(...xs) + 0.5) / (Math.max(...ys) - Math.min(...ys) + 0.5);
+      if (p > proporcion + 1e-6) { proporcion = p; giro = t; }
+    }
+    girar(g, giro);
     return aOrigen(g);
   }
 
