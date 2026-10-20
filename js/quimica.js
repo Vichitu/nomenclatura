@@ -26,7 +26,14 @@ const Quimica = (() => {
     try { return fn(m); } finally { m.delete(); }
   }
 
-  const canonico = (entrada) => conMol(entrada, (m) => m.get_smiles());
+  // SMILES canónico SIN estereoquímica. Al leer un dibujo con coordenadas, RDKit
+  // deduce E/Z de la geometría de los dobles enlaces; como la constitución es lo
+  // único que se compara, se quitan los marcadores / \ @ y se vuelve a canonizar.
+  function canonico(entrada) {
+    const s = conMol(entrada, (m) => m.get_smiles());
+    if (!s || !/[/\\@]/.test(s)) return s;
+    return conMol(s.replace(/[/\\]/g, '').replace(/@+/g, ''), (m) => m.get_smiles());
+  }
 
   function contarCoincidencias(entrada, smarts) {
     let q = null;
