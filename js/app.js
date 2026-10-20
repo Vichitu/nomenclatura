@@ -195,9 +195,12 @@
       const mols = MOLECULAS.filter((m) => m.nv === n.id);
       const dominadas = mols.filter((m) => Progreso.caja(`dibujar:${m.n}`) >= 2 || Progreso.caja(`nombrar:${m.n}`) >= 2).length;
       const on = niveles.has(n.id);
+      const pct = Math.round((100 * dominadas) / mols.length);
       return `<button class="chip ${on ? 'on' : ''}" data-nv="${n.id}" aria-pressed="${on}"
-        title="${dominadas} de ${mols.length} moléculas dominadas (acertadas a la primera dos veces seguidas)">
-        ${on ? '✓ ' : ''}${esc(n.nombre)} <span class="progreso">${dominadas}/${mols.length}</span></button>`;
+        title="${dominadas} de ${mols.length} moléculas dominadas (acertadas a la primera dos veces seguidas)"
+        aria-label="${esc(n.nombre)}: ${dominadas} de ${mols.length} moléculas dominadas">
+        <span class="chip-fila">${on ? '✓ ' : ''}${esc(n.nombre)} <span class="progreso">${dominadas}/${mols.length}</span></span>
+        <span class="chip-barra" aria-hidden="true"><span style="width:${pct}%"></span></span></button>`;
     }).join('');
     const todos = niveles.size === NIVELES.length;
     $('#niveles').innerHTML = html + `<button class="chip todos" data-nv="*">${todos ? 'Elegir solo uno' : 'Todos los temas'}</button>`;
