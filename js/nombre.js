@@ -437,8 +437,8 @@ const Nombre = (() => {
     const cu = pu.find((p) => p.k === 'cadena'), cc = pc.find((p) => p.k === 'cadena');
     const nu = cu && cadenaDe(cu), nc = cc && cadenaDe(cc);
     if (nu && nc && nu.n !== nc.n) {
-      dif.push(`<b>Cadena principal:</b> tiene ${nc.n} carbonos («${PREFIJO[nc.n]}-»), no ${nu.n} («${PREFIJO[nu.n]}-»).`
-        + (nc.anillo ? '' : ' Debe contener el grupo principal y, después, ser la más larga posible.'));
+      dif.push(`<b>Cadena principal:</b> tiene ${nc.n} carbonos («${PREFIJO[nc.n]}-»), no ${nu.n} («${PREFIJO[nu.n]}-»)`
+        + (nc.anillo && !nu.anillo ? ' y forma un anillo («ciclo-»).' : nc.anillo ? '.' : '. Debe contener el grupo principal y, después, ser la más larga posible.'));
     } else if (nu && nc && nu.anillo !== nc.anillo) {
       dif.push(nc.anillo ? '<b>Cadena principal:</b> es un anillo, así que lleva el prefijo «ciclo-».' : '<b>Cadena principal:</b> es una cadena abierta: no lleva «ciclo-».');
     }
@@ -460,7 +460,9 @@ const Nombre = (() => {
       const u = su.get(base);
       const conLocs = v.locs[0] !== '?';
       if (!u) {
-        dif.push(`<b>Sustituyentes:</b> falta «${base}»${conLocs ? ` en ${cs(v.locs)}` : ''}.`);
+        dif.push(v.locs.length > 1
+          ? `<b>Sustituyentes:</b> faltan ${v.locs.length} grupos «${base}»${conLocs ? ` (en ${cs(v.locs)})` : ''}.`
+          : `<b>Sustituyentes:</b> falta «${base}»${conLocs ? ` en ${cs(v.locs)}` : ''}.`);
       } else if (v.locs.length !== u.locs.length) {
         dif.push(`<b>Sustituyentes:</b> hay ${v.locs.length} grupo${v.locs.length > 1 ? 's' : ''} «${base}»${conLocs ? ` (${cs(v.locs)})` : ''}, no ${u.locs.length}.`);
       } else if (v.locs.join() !== u.locs.join()) {

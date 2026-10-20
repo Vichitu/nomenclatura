@@ -130,7 +130,11 @@
     ocultarSolucion: () => { $('#solucion').hidden = true; },
   };
 
+  // Vista de aplicación (portátil/escritorio): todo en pantalla, corrección en el panel lateral.
+  const escritorio = () => window.matchMedia('(min-width: 1100px) and (min-height: 560px)').matches;
+
   function limpiar() {
+    $('#lateral').scrollTop = 0;
     ctx.feedback('');
     $('#pistas').innerHTML = '';
     $('#solucion').hidden = true;
@@ -164,7 +168,7 @@
     $('#nota').innerHTML = m.nota ? `<b>Ojo:</b> ${esc(m.nota)}` : '';
     $('#solucion').hidden = false;
     pintarSolucion();
-    if (desplazar && !$('#z-editor').hidden) $('#solucion').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (desplazar && !escritorio()) $('#feedback').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function pintarSolucion() {
@@ -265,7 +269,8 @@
 
   function bienvenida(mostrar) {
     $('#bienvenida').hidden = !mostrar;
-    if (!mostrar) Progreso.pref('bienvenida', true);
+    if (mostrar) $('#btn-bienvenida').focus();
+    else Progreso.pref('bienvenida', true);
   }
 
   // ───────── Arranque ─────────
@@ -285,7 +290,6 @@
     pintarPaleta();
     pintarNiveles();
     pintarMarcador();
-    if (window.matchMedia('(min-width: 760px)').matches) $('#temas').open = true;
     bienvenida(!Progreso.pref('bienvenida'));
 
     MOLECULAS.forEach((m) => {
@@ -297,7 +301,12 @@
     $('#niveles').addEventListener('click', (e) => { const b = e.target.closest('.chip'); if (b) alternarNivel(b.dataset.nv); });
     document.querySelectorAll('[data-modo]').forEach((b) => b.addEventListener('click', () => ponerModo(b.dataset.modo)));
     $('#btn-mas').addEventListener('click', () => abrirMenu($('#menu-mas').hidden));
-    document.addEventListener('click', (e) => { if (!e.target.closest('.mas')) abrirMenu(false); });
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.mas')) abrirMenu(false);
+      // En la vista de escritorio, los temas son un desplegable: se cierra al hacer clic fuera.
+      if (escritorio() && !e.target.closest('.temas')) $('#temas').open = false;
+    });
+    $('#bienvenida').addEventListener('click', (e) => { if (e.target === $('#bienvenida')) bienvenida(false); });
     $('#btn-comprobar').addEventListener('click', () => modo.comprobar?.(ctx));
     $('#btn-pista').addEventListener('click', () => modo.pista?.(ctx));
     $('#btn-solucion').addEventListener('click', () => modo.solucion?.(ctx));
@@ -306,13 +315,15 @@
     $('#btn-centrar').addEventListener('click', () => ctx.editor.centrar());
     $('#btn-limpiar').addEventListener('click', () => ctx.editor.limpiar());
     $('#btn-bienvenida').addEventListener('click', () => bienvenida(false));
-    $('#btn-ver-bienvenida').addEventListener('click', () => { bienvenida(true); $('#bienvenida').scrollIntoView({ behavior: 'smooth' }); });
+    $('#btn-ver-bienvenida').addEventListener('click', () => bienvenida(true));
     $('#respuesta').addEventListener('keydown', (e) => { if (e.key === 'Enter') modo.comprobar?.(ctx); });
     $('#feedback').addEventListener('click', (e) => { if (e.target.closest('[data-explicar]')) modo.explicar?.(ctx); });
     $('#z-opciones').addEventListener('click', (e) => { const b = e.target.closest('[data-opcion]'); if (b) modo.opcion?.(ctx, b.dataset.opcion, b); });
     $('#z-inicio').addEventListener('click', (e) => { const b = e.target.closest('[data-accion]'); if (b) modo.accion?.(ctx, b.dataset.accion, b); });
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !$('#menu-mas').hidden) { abrirMenu(false); $('#btn-mas').focus(); }
+      if (e.key === 'Escape' && !$('#bienvenida').hidden) bienvenida(false);
+      if (e.key === 'Escape' && $('#temas').open && escritorio()) $('#temas').open = false;
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !$('#z-editor').hidden && document.activeElement !== $('#respuesta')) {
         e.preventDefault();
         ctx.editor.deshacer();

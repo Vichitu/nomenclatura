@@ -127,7 +127,7 @@ body {
 h2 { font-size: 1.15rem; margin: 0 0 4px; letter-spacing: -.01em; }
 h3 { font-size: .95rem; margin: 18px 0 8px; }
 
-.contenedor { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+.app { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
 
 button {
   font: inherit;
@@ -152,13 +152,16 @@ button:disabled { opacity: .45; cursor: default; }
 /* ───────────── Barra superior ───────────── */
 .barra-sup {
   position: sticky; top: 0; z-index: 20;
-  background: color-mix(in srgb, var(--panel) 82%, transparent);
+  background: color-mix(in srgb, var(--panel) 85%, transparent);
   backdrop-filter: saturate(1.4) blur(10px);
   border-bottom: 1px solid var(--borde);
 }
-.barra-sup-in { display: flex; align-items: center; gap: 16px; min-height: 64px; flex-wrap: wrap; padding-top: 8px; padding-bottom: 8px; }
+.barra-sup-in {
+  display: flex; align-items: center; gap: 10px 16px; flex-wrap: wrap;
+  max-width: 1180px; margin: 0 auto; padding: 10px 24px;
+}
 .marca { display: flex; align-items: center; gap: 12px; }
-.marca strong { display: block; font-size: 1.05rem; letter-spacing: -.01em; }
+.marca strong { display: block; font-size: 1.05rem; letter-spacing: -.01em; white-space: nowrap; }
 .marca span { display: block; font-size: .8rem; color: var(--suave); }
 .logo { width: 36px; height: 36px; flex: none; }
 .logo polygon { fill: var(--acento); }
@@ -171,29 +174,30 @@ button:disabled { opacity: .45; cursor: default; }
 }
 .pastilla .icono { width: 16px; height: 16px; color: var(--acento); }
 .pastilla b { color: var(--tinta); font-variant-numeric: tabular-nums; }
+.boton-ayuda { padding: 5px 8px; cursor: pointer; }
 
 /* ───────────── Modos ───────────── */
 .modos {
+  order: 3; width: 100%;
   display: grid;
   grid-template-columns: repeat(3, 1fr) minmax(220px, .9fr);
   gap: 10px;
-  margin: 22px 0 14px;
 }
 .modo {
   display: flex; align-items: center; gap: 12px; text-align: left;
-  padding: 14px; border-radius: var(--radio);
-  background: var(--panel); border: 1.5px solid var(--borde); box-shadow: var(--sombra);
+  padding: 12px 14px; border-radius: var(--radio);
+  background: var(--panel); border: 1.5px solid var(--borde);
   width: 100%; height: 100%;
 }
 .modo-icono {
-  width: 42px; height: 42px; border-radius: 12px; flex: none;
+  width: 40px; height: 40px; border-radius: 12px; flex: none;
   display: grid; place-items: center;
   background: var(--acento-suave); color: var(--acento);
 }
-.modo-icono .icono { width: 21px; height: 21px; }
-.modo-texto b { display: block; font-size: .98rem; letter-spacing: -.01em; }
+.modo-icono .icono { width: 20px; height: 20px; }
+.modo-texto b { display: block; font-size: .96rem; letter-spacing: -.01em; }
 .modo-texto small { display: block; color: var(--suave); font-size: .8rem; line-height: 1.35; margin-top: 2px; }
-.modo.activo { border-color: var(--acento); background: color-mix(in srgb, var(--acento) 7%, var(--panel)); }
+.modo.activo { border-color: var(--acento); background: color-mix(in srgb, var(--acento) 8%, var(--panel)); }
 .modo.activo .modo-icono { background: var(--acento); color: var(--acento-tinta); }
 .modo-mas .modo-icono { background: var(--panel-2); color: var(--suave); }
 .modo-mas .flecha { margin-left: auto; color: var(--suave); transition: transform .15s; }
@@ -216,34 +220,47 @@ button:disabled { opacity: .45; cursor: default; }
 .opcion-menu small { display: block; color: var(--suave); font-size: .8rem; }
 .opcion-menu.activo { background: var(--acento-suave); }
 
-/* ───────────── Bienvenida ───────────── */
-.bienvenida { border-color: color-mix(in srgb, var(--acento) 40%, var(--borde)); background: linear-gradient(135deg, var(--acento-suave), var(--panel) 60%); margin-bottom: 14px; }
+/* ───────────── Bienvenida (ventana) ───────────── */
+.velo {
+  position: fixed; inset: 0; z-index: 60;
+  display: grid; place-items: center; padding: 16px;
+  background: color-mix(in srgb, #000 55%, transparent);
+}
+.bienvenida {
+  width: min(620px, 100%); max-height: 100%; overflow: auto;
+  border-color: color-mix(in srgb, var(--acento) 40%, var(--borde));
+  background: linear-gradient(135deg, var(--acento-suave), var(--panel) 60%);
+  box-shadow: var(--sombra-alta);
+}
 .pasos-bienvenida { margin: 8px 0 16px; padding-left: 22px; }
-.pasos-bienvenida li { margin: 6px 0; }
+.pasos-bienvenida li { margin: 8px 0; }
 
 /* ───────────── Temas ───────────── */
-.temas { margin-bottom: 14px; }
+.barra-herramientas { display: flex; align-items: center; gap: 10px; margin: 14px 0 10px; }
+.temas { position: relative; }
 .temas summary {
   cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: 8px;
-  font-weight: 600; font-size: .9rem; padding: 4px 0; user-select: none;
+  font-weight: 600; font-size: .88rem; user-select: none;
+  background: var(--panel); border: 1px solid var(--borde); border-radius: 999px; padding: 6px 14px;
 }
+.temas summary:hover { border-color: var(--acento); }
 .temas summary::-webkit-details-marker { display: none; }
-.temas summary::before { content: '▸'; color: var(--suave); transition: transform .15s; }
-.temas[open] summary::before { transform: rotate(90deg); }
+.temas summary::after { content: '▾'; color: var(--suave); }
+.temas[open] summary { border-color: var(--acento); background: var(--acento-suave); }
+.temas summary .icono { width: 16px; height: 16px; color: var(--acento); }
 .temas summary small { color: var(--suave); font-weight: 400; }
-.niveles { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 8px; }
-.chip { font-size: .84rem; padding: 5px 12px; border-radius: 999px; color: var(--suave); background: var(--panel); }
+.temas-panel { padding-top: 10px; }
+.niveles { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; flex-direction: column; gap: 4px; font-size: .84rem; padding: 5px 12px 6px; border-radius: 999px; color: var(--suave); background: var(--panel); }
 .chip.on { background: var(--acento-suave); border-color: var(--acento); color: var(--tinta); }
-.chip { display: inline-flex; flex-direction: column; gap: 4px; padding-bottom: 6px; }
 .chip .progreso { font-size: .74rem; opacity: .75; margin-left: 4px; font-variant-numeric: tabular-nums; }
 .chip-barra { display: block; height: 3px; border-radius: 99px; background: color-mix(in srgb, var(--suave) 22%, transparent); overflow: hidden; }
 .chip-barra > span { display: block; height: 100%; background: var(--bien); border-radius: 99px; }
-.chip.todos { justify-content: center; }
+.chip.todos { justify-content: center; border-style: dashed; }
 .nota-temas { margin: 10px 0 0; font-size: .8rem; color: var(--suave); max-width: 80ch; }
-.chip.todos { border-style: dashed; }
 
-/* ───────────── Tarjetas ───────────── */
-main { display: grid; gap: 16px; padding-bottom: 24px; }
+/* ───────────── Área principal ───────────── */
+.area { display: grid; gap: 16px; padding-bottom: 24px; }
 .tarjeta {
   background: var(--panel);
   border: 1px solid var(--borde);
@@ -252,6 +269,8 @@ main { display: grid; gap: 16px; padding-bottom: 24px; }
   box-shadow: var(--sombra);
 }
 .tarjeta:focus { outline: none; }
+.lateral { display: grid; gap: 14px; align-content: start; }
+.lateral-vacio { display: none; }
 .cargando { display: flex; align-items: center; justify-content: center; gap: 10px; color: var(--suave); padding: 48px 0; }
 .girando { width: 18px; height: 18px; border-radius: 50%; border: 2.5px solid var(--borde); border-top-color: var(--acento); animation: girar .8s linear infinite; }
 @keyframes girar { to { transform: rotate(360deg); } }
@@ -281,7 +300,8 @@ main { display: grid; gap: 16px; padding-bottom: 24px; }
 .pieza.el-I:not(.on) { color: var(--el-I); }
 .pieza.el-C, .pieza.el-O, .pieza.el-N, .pieza.el-S, .pieza.el-F, .pieza.el-I, .pieza.el-Cl, .pieza.el-Br { font-weight: 700; }
 
-.lienzo-marco { position: relative; }
+.lienzo-marco { display: flex; flex-direction: column; min-width: 0; }
+.lienzo-caja { position: relative; }
 .lienzo-ayuda { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .78rem; color: var(--suave); margin-bottom: 6px; }
 .lienzo-ayuda b { color: var(--acento); }
 .lienzo {
@@ -347,7 +367,7 @@ main { display: grid; gap: 16px; padding-bottom: 24px; }
 /* ───────────── Feedback ───────────── */
 .feedback:empty { display: none; }
 .feedback {
-  margin-top: 16px; padding: 14px 16px 14px 18px; border-radius: 12px;
+  padding: 14px 16px 14px 18px; border-radius: 12px;
   border: 1px solid var(--borde); border-left-width: 5px; background: var(--panel-2);
 }
 .feedback.bien { border-color: var(--bien); background: var(--bien-suave); }
@@ -370,7 +390,7 @@ main { display: grid; gap: 16px; padding-bottom: 24px; }
 .leyenda { font-size: .8rem; color: var(--suave); margin: 8px 0 0; }
 
 .pistas:empty { display: none; }
-.pistas { margin: 14px 0 0; padding: 12px 16px 12px 36px; background: var(--acento-suave); border-radius: 12px; }
+.pistas { margin: 0; padding: 12px 16px 12px 36px; background: var(--acento-suave); border-radius: 12px; }
 .pistas li { margin: 4px 0; }
 .pistas li::marker { color: var(--acento); font-weight: 700; }
 
@@ -455,18 +475,110 @@ main { display: grid; gap: 16px; padding-bottom: 24px; }
 .enlace-boton { background: none; border: 0; padding: 0; color: var(--acento); text-decoration: underline; }
 
 /* ───────────── Responsive ───────────── */
+
+/* Portátil y escritorio: vista de aplicación que ocupa toda la pantalla, sin scroll de página.
+   Ejercicio a la izquierda (el lienzo se estira) y corrección/explicación en el panel derecho. */
+@media (min-width: 1100px) and (min-height: 560px) {
+  html, body { height: 100%; }
+  body { display: flex; flex-direction: column; overflow: hidden; }
+
+  .barra-sup { position: relative; flex: none; }
+  .barra-sup-in { max-width: none; flex-wrap: nowrap; padding: 8px 20px; gap: 16px; }
+  .marca span { display: none; }
+  .modos { order: 0; width: auto; flex: 1; display: flex; justify-content: center; gap: 6px; }
+  .modo { width: auto; height: auto; padding: 5px 12px 5px 5px; gap: 8px; border-radius: 12px; border-width: 1px; }
+  .modo-icono { width: 30px; height: 30px; border-radius: 9px; }
+  .modo-icono .icono { width: 17px; height: 17px; }
+  .modo-texto b { font-size: .88rem; white-space: nowrap; }
+  .modo-texto small { display: none; }
+  .marcador { margin-left: 0; flex-wrap: nowrap; }
+  .pastilla small { display: none; }
+
+  .app { flex: 1; min-height: 0; width: 100%; max-width: none; display: flex; flex-direction: column; padding: 0 20px 16px; }
+  .barra-herramientas { flex: none; margin: 10px 0; }
+  .temas-panel {
+    position: absolute; left: 0; top: calc(100% + 8px); z-index: 40;
+    width: min(780px, 90vw); padding: 16px;
+    background: var(--panel); border: 1px solid var(--borde); border-radius: var(--radio); box-shadow: var(--sombra-alta);
+  }
+
+  .area { flex: 1; min-height: 0; padding: 0; grid-template-columns: minmax(0, 1fr) clamp(340px, 31vw, 500px); }
+
+  .ejercicio { display: flex; flex-direction: column; min-height: 0; padding: 16px 22px 14px; }
+  .nombre-grande { font-size: 1.75rem; margin: 2px 0 10px; }
+  .zona-trabajo { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; overflow: auto; }
+  .zona-editor { flex: 1; min-height: 0; grid-template-rows: minmax(0, 1fr); }
+  .paleta { min-height: 0; overflow-y: auto; padding-right: 4px; gap: 10px; }
+  .lienzo-marco { min-height: 0; }
+  .lienzo-caja { flex: 1; min-height: 0; }
+  .lienzo { height: 100%; min-height: 220px; }
+  .figura-principal { flex: 1; min-height: 160px; margin: 0; }
+  .figura-principal .figura { max-height: 100%; }
+  .acciones { flex: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--borde); }
+
+  .lateral { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 4px; }
+  .lateral > * { flex: none; }
+  .lateral .tarjeta { padding: 18px; }
+  .lateral h2 { font-size: 1.05rem; }
+  .lateral .comparativa { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .lateral .comparada .figura-marco { min-height: 120px; padding: 10px; }
+  .lateral .comparada .figura { max-height: 150px; }
+  .lateral .figura { max-height: 230px; }
+  .lateral .nombre-partes { font-size: 1.25rem; }
+  .lateral .correccion { font-size: 1.2rem; }
+  .lateral .resumen { grid-template-columns: 1fr; }
+  .lateral-vacio {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    text-align: center; color: var(--suave); font-size: .9rem;
+    border: 1.5px dashed var(--borde); border-radius: var(--radio); padding: 32px 24px;
+  }
+  .lateral-vacio .icono { width: 26px; height: 26px; color: var(--acento); }
+  .lateral-vacio p { margin: 0; max-width: 30ch; }
+  .lateral:has(#feedback:not(:empty), #pistas:not(:empty), #explicacion:not([hidden]), #solucion:not([hidden]), #z-encontrados:not([hidden])) .lateral-vacio { display: none; }
+
+  .pie { display: none; }
+}
+
+/* Pantallas anchas: hay sitio para los textos de la cabecera. */
+@media (min-width: 1500px) and (min-height: 560px) {
+  .marca span { display: block; }
+  .pastilla small { display: inline; }
+}
+
+/* Portátiles justos de ancho: el logo basta. */
+@media (min-width: 1100px) and (max-width: 1349px) and (min-height: 560px) {
+  .marca > div { display: none; }
+}
+
+/* Pantallas bajas (portátil con zoom o barra de marcadores): menos aire. */
+@media (min-width: 1100px) and (max-height: 760px) {
+  .ejercicio { padding: 12px 18px 10px; }
+  .nombre-grande { font-size: 1.5rem; margin-bottom: 8px; }
+  .lienzo-ayuda { display: none; }
+  /* Paleta en horizontal, encima del lienzo, para que se vean todas las piezas. */
+  .zona-editor { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 10px; }
+  .paleta { flex-direction: row; flex-wrap: wrap; gap: 6px 16px; overflow: visible; padding-right: 0; }
+  .grupo-paleta { display: flex; align-items: center; gap: 6px; }
+  .grupo-paleta > span { margin: 0; font-size: .64rem; }
+  .grupo-paleta > div { flex-wrap: nowrap; }
+  .pieza { min-height: 30px; min-width: 32px; padding: 3px 8px; }
+  .acciones { margin-top: 8px; padding-top: 8px; }
+  .acciones button { min-height: 38px; }
+}
+
 @media (max-width: 960px) {
   .modos { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 760px) {
   body { font-size: 15px; }
-  .contenedor { padding: 0 14px; }
-  .barra-sup-in { min-height: 56px; gap: 8px; }
+  .app { padding: 0 14px; }
+  .barra-sup { position: static; }
+  .barra-sup-in { padding: 10px 14px; gap: 8px; }
   .marca span { display: none; }
-  .marcador { margin-left: 0; width: 100%; }
+  .marcador { margin-left: 0; width: 100%; order: 2; }
   .pastilla small { display: none; }
-  .modos { gap: 8px; margin-top: 14px; }
+  .modos { gap: 8px; }
   .modo { padding: 10px; gap: 10px; }
   .modo-icono { width: 34px; height: 34px; border-radius: 10px; }
   .modo-texto small { display: none; }

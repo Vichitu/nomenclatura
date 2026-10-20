@@ -29,15 +29,54 @@
       <symbol id="i-repasar" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></symbol>
       <symbol id="i-pista" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></symbol>
       <symbol id="i-ojo" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+      <symbol id="i-ayuda" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+      <symbol id="i-temas" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></symbol>
     </defs>
   </svg>
 
   <header class="barra-sup">
-    <div class="contenedor barra-sup-in">
+    <div class="barra-sup-in">
       <div class="marca">
         <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><polygon points="16,2 28,9 28,23 16,30 4,23 4,9"/><circle cx="16" cy="16" r="6"/></svg>
         <div><strong>Nomenclatura orgánica</strong><span>Práctica de formulación IUPAC</span></div>
       </div>
+
+      <nav class="modos" aria-label="Tipo de ejercicio">
+        <button class="modo" data-modo="dibujar" title="Te doy el nombre y dibujas la molécula">
+          <span class="modo-icono"><svg class="icono"><use href="#i-dibujar"/></svg></span>
+          <span class="modo-texto"><b>Nombre → Estructura</b><small>Te doy el nombre y dibujas la molécula</small></span>
+        </button>
+        <button class="modo" data-modo="nombrar" title="Te doy la molécula y escribes su nombre">
+          <span class="modo-icono"><svg class="icono"><use href="#i-nombrar"/></svg></span>
+          <span class="modo-texto"><b>Estructura → Nombre</b><small>Te doy la molécula y escribes su nombre</small></span>
+        </button>
+        <button class="modo" data-modo="repaso" title="Examen de prueba con todos los temas">
+          <span class="modo-icono"><svg class="icono"><use href="#i-repaso"/></svg></span>
+          <span class="modo-texto"><b>Repaso general</b><small>Examen de prueba con todos los temas</small></span>
+        </button>
+        <div class="mas">
+          <button class="modo modo-mas" id="btn-mas" aria-haspopup="true" aria-expanded="false" aria-controls="menu-mas">
+            <span class="modo-icono"><svg class="icono"><use href="#i-mas"/></svg></span>
+            <span class="modo-texto"><b id="mas-titulo">Más ejercicios</b><small>Errores, isómeros, R/S…</small></span>
+            <svg class="icono flecha"><use href="#i-flecha"/></svg>
+          </button>
+          <div class="menu-mas" id="menu-mas" hidden>
+            <button class="opcion-menu" data-modo="error">
+              <svg class="icono"><use href="#i-error"/></svg>
+              <span><b>Encuentra el error</b><small>¿El nombre es correcto o qué regla incumple?</small></span>
+            </button>
+            <button class="opcion-menu" data-modo="isomeros">
+              <svg class="icono"><use href="#i-isomeros"/></svg>
+              <span><b>Isómeros</b><small>Dibuja todos los isómeros de una fórmula</small></span>
+            </button>
+            <button class="opcion-menu" data-modo="estereo">
+              <svg class="icono"><use href="#i-estereo"/></svg>
+              <span><b>Estereoquímica</b><small>Asigna R/S y E/Z</small></span>
+            </button>
+          </div>
+        </div>
+      </nav>
+
       <div class="marcador" aria-live="polite">
         <span class="pastilla" title="Ejercicios resueltos seguidos sin mirar la solución">
           <svg class="icono"><use href="#i-racha"/></svg><b id="racha">0</b><small>racha</small></span>
@@ -45,96 +84,60 @@
           <svg class="icono"><use href="#i-acierto"/></svg><b id="sesion">0/0</b><small>aciertos</small></span>
         <span class="pastilla" title="Moléculas que toca repasar hoy (las que fallaste vuelven antes)">
           <svg class="icono"><use href="#i-repasar"/></svg><b id="pendientes">0</b><small>por repasar</small></span>
+        <button class="pastilla boton-ayuda" id="btn-ver-bienvenida" title="Cómo funciona" aria-label="Cómo funciona">
+          <svg class="icono"><use href="#i-ayuda"/></svg></button>
       </div>
     </div>
   </header>
 
-  <div class="contenedor">
-    <nav class="modos" aria-label="Tipo de ejercicio">
-      <button class="modo" data-modo="dibujar">
-        <span class="modo-icono"><svg class="icono"><use href="#i-dibujar"/></svg></span>
-        <span class="modo-texto"><b>Nombre → Estructura</b><small>Te doy el nombre y dibujas la molécula</small></span>
-      </button>
-      <button class="modo" data-modo="nombrar">
-        <span class="modo-icono"><svg class="icono"><use href="#i-nombrar"/></svg></span>
-        <span class="modo-texto"><b>Estructura → Nombre</b><small>Te doy la molécula y escribes su nombre</small></span>
-      </button>
-      <button class="modo" data-modo="repaso">
-        <span class="modo-icono"><svg class="icono"><use href="#i-repaso"/></svg></span>
-        <span class="modo-texto"><b>Repaso general</b><small>Examen de prueba con todos los temas</small></span>
-      </button>
-      <div class="mas">
-        <button class="modo modo-mas" id="btn-mas" aria-haspopup="true" aria-expanded="false" aria-controls="menu-mas">
-          <span class="modo-icono"><svg class="icono"><use href="#i-mas"/></svg></span>
-          <span class="modo-texto"><b id="mas-titulo">Más ejercicios</b><small>Errores, isómeros, R/S…</small></span>
-          <svg class="icono flecha"><use href="#i-flecha"/></svg>
-        </button>
-        <div class="menu-mas" id="menu-mas" hidden>
-          <button class="opcion-menu" data-modo="error">
-            <svg class="icono"><use href="#i-error"/></svg>
-            <span><b>Encuentra el error</b><small>¿El nombre es correcto o qué regla incumple?</small></span>
-          </button>
-          <button class="opcion-menu" data-modo="isomeros">
-            <svg class="icono"><use href="#i-isomeros"/></svg>
-            <span><b>Isómeros</b><small>Dibuja todos los isómeros de una fórmula</small></span>
-          </button>
-          <button class="opcion-menu" data-modo="estereo">
-            <svg class="icono"><use href="#i-estereo"/></svg>
-            <span><b>Estereoquímica</b><small>Asigna R/S y E/Z</small></span>
-          </button>
+  <div class="app">
+    <div class="barra-herramientas">
+      <details class="temas" id="temas">
+        <summary><svg class="icono"><use href="#i-temas"/></svg><span>Temas</span> <small id="temas-resumen"></small></summary>
+        <div class="temas-panel">
+          <div class="niveles" id="niveles" role="group" aria-label="Temas incluidos"></div>
+          <p class="nota-temas">Toca un tema para incluirlo o quitarlo. El número (p. ej. <b>3/24</b>) y la barra indican cuántas moléculas del tema tienes <b>dominadas</b>: las has acertado a la primera dos veces seguidas al dibujarlas o al nombrarlas. Si fallas una, deja de contar hasta que la vuelvas a dominar.</p>
         </div>
-      </div>
-    </nav>
+      </details>
+    </div>
 
-    <section class="tarjeta bienvenida" id="bienvenida" hidden aria-labelledby="bienvenida-titulo">
-      <h2 id="bienvenida-titulo">¡Bienvenido/a! Así funciona</h2>
-      <ol class="pasos-bienvenida">
-        <li><b>Elige qué practicar</b> arriba: dibujar a partir del nombre, nombrar lo que ves o hacer un repaso tipo examen.</li>
-        <li><b>Si fallas, no pasa nada:</b> corrígelo y vuelve a comprobar, o pulsa «¿Por qué está mal?» para ver qué falla y cómo arreglarlo.</li>
-        <li><b>Tu progreso se guarda</b> en este navegador. Las moléculas que fallas vuelven a salir antes para que las repases.</li>
-      </ol>
-      <button class="primario" id="btn-bienvenida">Entendido, ¡a practicar!</button>
-    </section>
-
-    <details class="temas" id="temas">
-      <summary><span>Temas</span> <small id="temas-resumen"></small></summary>
-      <div class="niveles" id="niveles" role="group" aria-label="Temas incluidos"></div>
-      <p class="nota-temas">Toca un tema para incluirlo o quitarlo. El número (p. ej. <b>3/24</b>) y la barra indican cuántas moléculas del tema tienes <b>dominadas</b>: las has acertado a la primera dos veces seguidas al dibujarlas o al nombrarlas. Si fallas una, deja de contar hasta que la vuelvas a dominar.</p>
-    </details>
-
-    <main>
-      <section class="tarjeta" id="ejercicio" tabindex="-1">
+    <main class="area">
+      <section class="tarjeta ejercicio" id="ejercicio" tabindex="-1">
         <div class="cargando" id="cargando"><span class="girando"></span>Cargando el motor químico…</div>
 
         <div class="progreso-repaso" id="progreso-repaso" hidden></div>
         <div class="enunciado" id="enunciado"></div>
 
-        <div id="z-editor" class="zona-editor" hidden>
-          <div class="paleta" id="paleta" aria-label="Piezas para construir la molécula"></div>
-          <div class="lienzo-marco">
-            <div class="lienzo-ayuda">
-              <span><b>1.</b> Elige una pieza</span><span><b>2.</b> Clic en el lienzo o en un átomo</span><span><b>3.</b> Clic en un enlace → doble/triple</span>
-            </div>
-            <svg id="lienzo" class="lienzo" role="img" aria-label="Zona de dibujo"></svg>
-            <div class="lienzo-acciones">
-              <button id="btn-deshacer" title="Deshacer (Ctrl+Z)">↶ Deshacer</button>
-              <button id="btn-centrar">Centrar</button>
-              <button id="btn-limpiar">Vaciar</button>
+        <div class="zona-trabajo">
+          <div id="z-editor" class="zona-editor" hidden>
+            <div class="paleta" id="paleta" aria-label="Piezas para construir la molécula"></div>
+            <div class="lienzo-marco">
+              <div class="lienzo-ayuda">
+                <span><b>1.</b> Elige una pieza</span><span><b>2.</b> Clic en el lienzo o en un átomo</span><span><b>3.</b> Clic en un enlace → doble/triple</span>
+              </div>
+              <div class="lienzo-caja">
+                <svg id="lienzo" class="lienzo" role="img" aria-label="Zona de dibujo"></svg>
+                <div class="lienzo-acciones">
+                  <button id="btn-deshacer" title="Deshacer (Ctrl+Z)">↶ Deshacer</button>
+                  <button id="btn-centrar">Centrar</button>
+                  <button id="btn-limpiar">Vaciar</button>
+                </div>
+              </div>
             </div>
           </div>
+
+          <div id="z-figura" class="figura-marco figura-principal" hidden><svg id="figura" class="figura" role="img" aria-label="Molécula"></svg></div>
+
+          <div id="z-respuesta" hidden>
+            <label class="etiqueta-campo" for="respuesta">Tu respuesta</label>
+            <input id="respuesta" class="respuesta" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+                   placeholder="p. ej. 3-metilpentan-2-ol">
+            <p class="ayuda-campo">Pulsa Intro para comprobar. Las tildes y mayúsculas no importan.</p>
+          </div>
+
+          <div id="z-opciones" hidden></div>
+          <div id="z-inicio" class="inicio" hidden></div>
         </div>
-
-        <div id="z-figura" class="figura-marco" hidden><svg id="figura" class="figura" role="img" aria-label="Molécula"></svg></div>
-
-        <div id="z-respuesta" hidden>
-          <label class="etiqueta-campo" for="respuesta">Tu respuesta</label>
-          <input id="respuesta" class="respuesta" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
-                 placeholder="p. ej. 3-metilpentan-2-ol">
-          <p class="ayuda-campo">Pulsa Intro para comprobar. Las tildes y mayúsculas no importan.</p>
-        </div>
-
-        <div id="z-opciones" hidden></div>
-        <div id="z-inicio" class="inicio" hidden></div>
 
         <div class="acciones">
           <button id="btn-comprobar" class="primario">Comprobar</button>
@@ -142,30 +145,46 @@
           <button id="btn-solucion" class="secundario"><svg class="icono"><use href="#i-ojo"/></svg>Ver solución</button>
           <button id="btn-siguiente" class="fantasma siguiente">Siguiente →</button>
         </div>
+      </section>
 
+      <aside class="lateral" id="lateral" aria-label="Corrección y explicación">
+        <div class="lateral-vacio">
+          <svg class="icono"><use href="#i-pista"/></svg>
+          <p>Aquí aparecerán la corrección, las pistas y la explicación de cada ejercicio.</p>
+        </div>
         <div class="feedback" id="feedback" aria-live="polite"></div>
         <ol class="pistas" id="pistas" aria-live="polite"></ol>
-        <div id="z-encontrados" class="encontrados" hidden></div>
-      </section>
-
-      <section class="tarjeta explicacion" id="explicacion" hidden></section>
-
-      <section class="tarjeta solucion" id="solucion" hidden>
-        <h2>Cómo se lee el nombre</h2>
-        <p class="ayuda">Pasa el ratón o toca cada parte del nombre para ver a qué átomos corresponde.</p>
-        <div class="trivial" id="trivial"></div>
-        <div class="nombre-partes" id="nombre-partes"></div>
-        <div class="figura-marco"><svg id="figura-sol" class="figura" role="img" aria-label="Solución"></svg></div>
-        <h3>Paso a paso</h3>
-        <ol class="pasos" id="pasos"></ol>
-        <p class="nota" id="nota" hidden></p>
-      </section>
+        <div id="z-encontrados" class="tarjeta encontrados" hidden></div>
+        <section class="tarjeta explicacion" id="explicacion" hidden></section>
+        <section class="tarjeta solucion" id="solucion" hidden>
+          <h2>Cómo se lee el nombre</h2>
+          <p class="ayuda">Pasa el ratón o toca cada parte del nombre para ver a qué átomos corresponde.</p>
+          <div class="trivial" id="trivial"></div>
+          <div class="nombre-partes" id="nombre-partes"></div>
+          <div class="figura-marco"><svg id="figura-sol" class="figura" role="img" aria-label="Solución"></svg></div>
+          <h3>Paso a paso</h3>
+          <ol class="pasos" id="pasos"></ol>
+          <p class="nota" id="nota" hidden></p>
+        </section>
+      </aside>
     </main>
 
     <footer class="pie">
       <p>Basado en los apuntes del Tema 2 (Química orgánica estructural) y en las recomendaciones IUPAC. Tu progreso solo se guarda en este navegador.</p>
-      <button class="enlace-boton" id="btn-ver-bienvenida">¿Cómo funciona?</button>
     </footer>
+  </div>
+
+  <div class="velo" id="bienvenida" hidden>
+    <section class="tarjeta bienvenida" role="dialog" aria-modal="true" aria-labelledby="bienvenida-titulo">
+      <h2 id="bienvenida-titulo">¡Bienvenido/a! Así funciona</h2>
+      <ol class="pasos-bienvenida">
+        <li><b>Elige qué practicar</b> arriba: dibujar a partir del nombre, nombrar lo que ves o hacer un repaso tipo examen. En «Más ejercicios» tienes errores, isómeros y estereoquímica.</li>
+        <li><b>Si fallas, no pasa nada:</b> corrígelo y vuelve a comprobar, o pulsa «¿Por qué está mal?» para ver qué falla y cómo arreglarlo. La corrección aparece en el panel de la derecha.</li>
+        <li><b>Elige los temas</b> con el botón «Temas»: el número de cada tema indica cuántas moléculas dominas.</li>
+        <li><b>Tu progreso se guarda</b> en este navegador. Las moléculas que fallas vuelven a salir antes para que las repases.</li>
+      </ol>
+      <button class="primario" id="btn-bienvenida">Entendido, ¡a practicar!</button>
+    </section>
   </div>
 
   <script src="https://unpkg.com/@rdkit/rdkit@2024.3.5-1.0.0/dist/RDKit_minimal.js"></script>
