@@ -245,13 +245,43 @@ window.MODOS = window.MODOS || {};
     ctx.pintarFigura(g, { locantes: true, etiquetas, S: 50 });
   }
 
+  // Cómo se lee el centro en el dibujo que ve el alumno: sentido de ①→②→③ en el papel
+  // y hacia dónde apunta el ④ (si va hacia delante, el giro se invierte).
+  function lecturaEnPapel(g, c, ramas) {
+    const C = g.atoms[c];
+    const z = (n) => {
+      const b = enlace(g, c, n);
+      return b.a === c ? (b.estereo === 1 ? 1 : b.estereo === 6 ? -1 : 0) : 0;
+    };
+    const cuarto = ramas[3];
+    if (!cuarto || ramas.slice(0, 3).some((r) => r.atomo == null)) return null;
+    // ④ implícito (H): apunta al lado contrario de los grupos dibujados en cuña.
+    const zCuarto = cuarto.atomo != null ? z(cuarto.atomo) : -Math.sign(ramas.slice(0, 3).reduce((s, r) => s + z(r.atomo), 0));
+    if (!zCuarto) return null;
+    const [p1, p2, p3] = ramas.slice(0, 3).map((r) => g.atoms[r.atomo]);
+    const area = (p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x);
+    if (Math.abs(area) < 1e-6) return null;
+    // Pantalla con y hacia abajo: área positiva = sentido horario.
+    const horarioPapel = area > 0;
+    const horarioReal = zCuarto < 0 ? horarioPapel : !horarioPapel;
+    return { horarioPapel, delante: zCuarto > 0, resultado: horarioReal ? 'R' : 'S' };
+  }
+
   function explicacion(ctx, el) {
     const e = ctx.est;
     const g = e.q.g0, adj = e.q.adj;
     if (!el.fiable) return `${nombreElemento(el)}: <b>${el.resp}</b>.`;
     if (el.tipo === 'centro') {
       const lista = el.ramas.map((r, k) => `${'①②③④'[k]} ${etiquetaRama(g, adj, el.c, r.atomo)}`).join(', ');
-      return `C${el.loc}: prioridades ${lista}. Con el ④ hacia atrás, ①→②→③ gira en sentido <b>${el.resp === 'R' ? 'horario → R' : 'antihorario → S'}</b>.`;
+      const sentido = (h) => (h ? 'horario' : 'antihorario');
+      const l = lecturaEnPapel(e.g, el.c, el.ramas);
+      if (!l || l.resultado !== el.resp) {
+        return `C${el.loc}: prioridades ${lista}. Mirando con el ④ hacia atrás, ①→②→③ gira en sentido <b>${sentido(el.resp === 'R')} → ${el.resp}</b>.`;
+      }
+      const cuarto = etiquetaRama(g, adj, el.c, el.ramas[3].atomo);
+      return l.delante
+        ? `C${el.loc}: prioridades ${lista}. En el dibujo, ①→②→③ gira en sentido <b>${sentido(l.horarioPapel)}</b>, pero el ④ (${cuarto}) apunta <b>hacia delante</b>, así que hay que invertirlo: ${sentido(!l.horarioPapel)} → <b>${el.resp}</b>.`
+        : `C${el.loc}: prioridades ${lista}. En el dibujo, ①→②→③ gira en sentido <b>${sentido(l.horarioPapel)}</b> y el ④ (${cuarto}) queda <b>hacia atrás</b>, así que se lee tal cual → <b>${el.resp}</b>.`;
     }
     const lado = (c, ramas) => `en C${g.atoms[c].map}, ${etiquetaRama(g, adj, c, ramas[0].atomo)} &gt; ${etiquetaRama(g, adj, c, ramas[1]?.atomo)}`;
     return `C${el.loc}=C${el.loc + 1}: ${lado(el.a, el.ramasA)}; ${lado(el.b, el.ramasB)}. Los de mayor prioridad están ${el.resp === 'Z' ? 'del mismo lado → <b>Z</b>' : 'en lados opuestos → <b>E</b>'}.`;
@@ -274,7 +304,7 @@ window.MODOS = window.MODOS || {};
     const notas = [
       meso ? 'Esta combinación es la <b>forma meso</b>: tiene un plano de simetría interno y es aquiral.' : '',
       e.q.dato.nota ? ctx.esc(e.q.dato.nota) : '',
-      els.some((x) => x.tipo === 'centro') ? 'Truco: si el grupo de menor prioridad queda hacia delante (cuña), el giro que ves en el papel se invierte.' : '',
+      els.some((x) => x.tipo === 'centro') ? 'Recuerda: el H que no se dibuja apunta al lado contrario de la cuña. Si la cuña es rayada (hacia atrás), el H va hacia delante y el giro que ves en el papel se invierte.' : '',
     ].filter(Boolean);
     ctx.feedback(`${rendirse ? '' : ok ? '<b>¡Correcto!</b> ' : '<b>No del todo.</b> '}El nombre completo es <b>${ctx.esc(nombreCompleto(e))}</b>.
       <ul>${els.map((el) => `<li>${explicacion(ctx, el)}</li>`).join('')}</ul>
@@ -319,7 +349,7 @@ window.MODOS = window.MODOS || {};
         ctx.pista('Reglas de Cahn-Ingold-Prelog: gana el sustituyente cuyo primer átomo tiene mayor número atómico (Br &gt; Cl &gt; O &gt; N &gt; C &gt; H). Si empatan, se comparan los átomos siguientes. Un doble enlace cuenta como dos átomos iguales.');
       } else if (e.nPistas === 2) {
         pintar(ctx, true);
-        ctx.pista('Te marco las prioridades en el dibujo (① = la más alta; «alta»/«baja» en los dobles enlaces). Si no ves el ④, es el H, que no se dibuja.');
+        ctx.pista('Te marco las prioridades en el dibujo (① = la más alta; «alta»/«baja» en los dobles enlaces). Si no ves el ④, es el H, que no se dibuja: apunta al lado contrario de la cuña (cuña rayada → H hacia delante → invierte el giro que ves).');
         ctx.botones({ pista: false });
       }
     },
