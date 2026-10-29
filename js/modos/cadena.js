@@ -1,7 +1,7 @@
-// «Cadena principal» (apuntes, págs. 16 y 25-33). Dos juegos:
-//  1. Marcar la cadena principal sobre el dibujo y numerarla (clic en C1 y C2).
-//     Se aceptan las elecciones equivalentes por simetría (automorfismos del grafo).
-//  2. Ordenar grupos funcionales por prioridad (tabla de la pág. 16).
+// «Cadena principal» (apuntes, págs. 25-33): marcar la cadena principal sobre el
+// dibujo y numerarla (clic en C1 y C2). Se aceptan las elecciones equivalentes por
+// simetría (automorfismos del grafo). El orden de prioridad de los grupos está en
+// el modo «Grupos funcionales».
 'use strict';
 
 window.MODOS = window.MODOS || {};
@@ -60,30 +60,6 @@ window.MODOS = window.MODOS || {};
     { n: 'ácido 3-amino-2-(2-aminoetil)pentanoico', s: 'O[C:1](=O)[CH:2](CCN)[CH:3](N)[CH2:4][CH3:5]', cadena: 'grupo', num: 'c1', nota: 'Ejemplo de los apuntes: la cadena debe contener el –COOH; de las que lo contienen, la más larga tiene 5 C.' },
     { n: 'ácido 2-(2-hidroxietoxi)etanoico', s: 'OCCO[CH2:2][C:1](=O)O', cadena: 'grupo', num: 'c1', nota: 'Ejemplo de los apuntes (ácido (2-hidroxietoxi)acético): el O del éter corta la cadena, y la parte con el –COOH es la principal.' },
   ];
-
-  // Tabla de prioridades de grupos funcionales (pág. 16), de mayor a menor.
-  const GRUPOS = [
-    { n: 'Ácido carboxílico', f: '–COOH', pre: 'carboxi-', suf: '-oico' },
-    { n: 'Éster', f: '–COOR', pre: 'alcoxicarbonil-', suf: '-oato de R' },
-    { n: 'Haluro de ácido', f: '–COX', pre: 'haloformil-', suf: 'haluro de -oilo' },
-    { n: 'Amida', f: '–CONH₂', pre: 'carbamoil-', suf: '-amida' },
-    { n: 'Nitrilo', f: '–C≡N', pre: 'ciano-', suf: '-nitrilo' },
-    { n: 'Aldehído', f: '–CHO', pre: 'oxo- / formil-', suf: '-al' },
-    { n: 'Cetona', f: 'C=O', pre: 'oxo-', suf: '-ona' },
-    { n: 'Alcohol', f: '–OH', pre: 'hidroxi-', suf: '-ol' },
-    { n: 'Tiol', f: '–SH', pre: 'sulfanil-', suf: '-tiol' },
-    { n: 'Amina', f: '–NH₂', pre: 'amino-', suf: '-amina' },
-    { n: 'Éter', f: '–O–R', pre: 'alcoxi-', suf: null },
-    { n: 'Halógeno', f: '–X', pre: 'halo- (cloro-, bromo-…)', suf: null },
-    { n: 'Nitro', f: '–NO₂', pre: 'nitro-', suf: null },
-  ];
-
-  const azar = (a) => a[Math.floor(Math.random() * a.length)];
-  const barajar = (a) => {
-    const r = a.slice();
-    for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; }
-    return r;
-  };
 
   // ───────── Simetría: automorfismos del grafo molecular ─────────
   function automorfismos(g, limite = 20000) {
@@ -274,59 +250,6 @@ window.MODOS = window.MODOS || {};
     }
   }
 
-  // ───────── Juego 2: ordenar grupos por prioridad ─────────
-  function iniciarOrden(ctx) {
-    const e = ctx.est;
-    e.juego = 'orden';
-    const indices = barajar(GRUPOS.map((_, i) => i)).slice(0, 4);
-    e.grupos = barajar(indices);
-    e.elegidos = [];
-    e.respondido = false;
-    ctx.zonas(['opciones']);
-    ctx.figuraClicable(false);
-    ctx.botones({ comprobar: 'Comprobar orden', pista: 'Pista', solucion: 'Ver solución', siguiente: 'Saltar →' });
-    ctx.enunciado('Cadena principal · prioridades', 'Haz clic en los grupos de mayor a menor prioridad (vuelve a hacer clic para deshacer)', 'Ordena por prioridad');
-    pintarOrden(ctx);
-  }
-
-  function pintarOrden(ctx) {
-    const e = ctx.est;
-    const correcto = e.grupos.slice().sort((a, b) => a - b);
-    ctx.$('#z-opciones').innerHTML = `<div class="orden-grupos">${e.grupos.map((gi) => {
-      const g = GRUPOS[gi];
-      const pos = e.elegidos.indexOf(gi);
-      let cls = pos >= 0 ? 'on' : '';
-      if (e.respondido) cls = correcto.indexOf(gi) === pos ? 'correcta' : 'incorrecta';
-      return `<button class="opcion grupo-orden ${cls}" data-opcion="${gi}" ${e.respondido ? 'disabled' : ''}>
-        <span class="orden-num">${pos >= 0 ? pos + 1 : ''}</span>
-        <span class="orden-formula">${g.f}</span><span class="orden-nombre">${g.n}</span></button>`;
-    }).join('')}</div>`;
-  }
-
-  function comprobarOrden(ctx, rendirse = false) {
-    const e = ctx.est;
-    if (!rendirse && e.elegidos.length < e.grupos.length) { ctx.feedback('Ordena los cuatro grupos antes de comprobar.', 'aviso'); return; }
-    const correcto = e.grupos.slice().sort((a, b) => a - b);
-    const ok = !rendirse && e.elegidos.every((gi, k) => gi === correcto[k]);
-    ctx.intento(ok);
-    ctx.registrar('orden-grupos', null, ok, ok ? null : 'grupo', false);
-    e.respondido = true;
-    if (rendirse) e.elegidos = correcto.slice();
-    pintarOrden(ctx);
-    const primero = GRUPOS[correcto[0]];
-    const filas = correcto.map((gi, k) => {
-      const g = GRUPOS[gi];
-      const uso = k === 0 && g.suf ? `sufijo <b>${g.suf}</b>` : `prefijo <b>${g.pre}</b>`;
-      return `<li><b>${g.n}</b> (${g.f}) → ${uso}</li>`;
-    }).join('');
-    const sinSufijo = !primero.suf ? '<p class="nota-estereo">Éteres, halógenos y nitro no tienen sufijo: si son los únicos grupos, la molécula se nombra como hidrocarburo con prefijos.</p>' : '';
-    ctx.feedback(`${ok ? '<b>¡Correcto!</b>' : rendirse ? '<b>Orden correcto:</b>' : '<b>No es ese orden.</b> El correcto es:'}
-      <ol class="orden-resultado">${filas}</ol>
-      <p class="nota-estereo">El de mayor prioridad es el grupo principal: va como sufijo y la cadena principal debe contenerlo. Los demás se nombran como prefijos.</p>${sinSufijo}`,
-    ok ? 'bien' : rendirse ? 'aviso' : 'mal');
-    ctx.botones({ comprobar: 'Siguiente ejercicio →', pista: false, solucion: false, siguiente: false });
-  }
-
   MODOS.cadena = {
     niveles: false,
     CADENAS,
@@ -334,60 +257,36 @@ window.MODOS = window.MODOS || {};
 
     nuevo(ctx) {
       ctx.est.terminado = false;
-      if (Math.random() < 0.7) iniciarCadena(ctx);
-      else iniciarOrden(ctx);
+      iniciarCadena(ctx);
     },
 
     comprobar(ctx) {
       const e = ctx.est;
-      if (e.juego === 'cadena') {
-        if (e.fase === 'fin') ctx.nuevo();
-        else if (e.fase === 'cadena') comprobarCadena(ctx);
-      } else if (e.respondido) ctx.nuevo();
-      else comprobarOrden(ctx);
+      if (e.fase === 'fin') ctx.nuevo();
+      else if (e.fase === 'cadena') comprobarCadena(ctx);
     },
 
     solucion(ctx) {
       const e = ctx.est;
-      if (e.juego === 'cadena') {
-        if (e.fase === 'cadena') comprobarCadena(ctx, true);
-        else if (e.fase === 'numerar') comprobarNumeracion(ctx, true);
-      } else if (!e.respondido) comprobarOrden(ctx, true);
+      if (e.fase === 'cadena') comprobarCadena(ctx, true);
+      else if (e.fase === 'numerar') comprobarNumeracion(ctx, true);
     },
 
     pista(ctx) {
       const e = ctx.est;
-      if (e.juego === 'orden') {
-        ctx.pista('Orden de la tabla de los apuntes: ácido &gt; éster &gt; haluro de ácido &gt; amida &gt; nitrilo &gt; aldehído &gt; cetona &gt; alcohol &gt; tiol &gt; amina &gt; éter &gt; halógeno &gt; nitro. Truco: cuantos más enlaces del carbono a heteroátomos (O, N), más prioridad.');
-        ctx.botones({ pista: false });
-        return;
-      }
       e.nPistas++;
       if (e.fase === 'cadena') {
-        const nC = [...e.correcta].length;
-        ctx.pista(e.nPistas === 1 ? `La cadena principal tiene ${nC} átomos.` : CRITERIO_CADENA[e.item.cadena]);
+        ctx.pista(e.nPistas === 1 ? `La cadena principal tiene ${e.correcta.size} átomos.` : CRITERIO_CADENA[e.item.cadena]);
       } else if (e.fase === 'numerar') {
         ctx.pista(CRITERIO_NUM[e.item.num]);
       }
     },
 
-    opcion(ctx, valor) {
-      const e = ctx.est;
-      if (e.juego !== 'orden' || e.respondido) return;
-      const gi = +valor;
-      const pos = e.elegidos.indexOf(gi);
-      if (pos >= 0) e.elegidos = e.elegidos.slice(0, pos);
-      else e.elegidos.push(gi);
-      pintarOrden(ctx);
-    },
-
-    clicFigura(ctx, p) {
-      if (ctx.est.juego === 'cadena') clicCadena(ctx, p);
-    },
+    clicFigura(ctx, p) { clicCadena(ctx, p); },
 
     siguiente(ctx) {
       const e = ctx.est;
-      if (e.juego === 'cadena' && e.fase !== 'fin' && e.fase !== 'cadena') ctx.registrar(`cadena:${e.item.n}`, null, false, null, false);
+      if (e.fase === 'numerar') ctx.registrar(`cadena:${e.item.n}`, null, false, null, false);
       ctx.nuevo();
     },
   };

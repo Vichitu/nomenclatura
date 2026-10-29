@@ -437,6 +437,8 @@ button:disabled { opacity: .45; cursor: default; }
 .barra.mini { width: 90px; height: 6px; }
 .inicio p { color: var(--suave); max-width: 70ch; }
 .botonera { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.casilla { display: flex; align-items: center; gap: 8px; margin-top: 10px; cursor: pointer; }
+.casilla input { width: 18px; height: 18px; accent-color: var(--acento); }
 .resumen { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .inicio table { border-collapse: collapse; width: 100%; font-size: .9rem; }
 .inicio td { padding: 6px 8px 6px 0; border-bottom: 1px solid var(--borde); }
@@ -475,6 +477,26 @@ button:disabled { opacity: .45; cursor: default; }
 .orden-nombre { color: var(--suave); font-size: .88rem; }
 .orden-resultado { margin: 8px 0 0; padding-left: 22px; }
 .orden-resultado li { margin: 4px 0; }
+
+/* ───────────── Ajustes de modo, tests y tabla de grupos ───────────── */
+.barra-herramientas { flex-wrap: wrap; }
+.ajustes-modo { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: .85rem; color: var(--suave); }
+.ajustes-modo label { display: inline-flex; align-items: center; gap: 6px; }
+.ajustes-modo select {
+  font: inherit; color: var(--tinta); background: var(--panel);
+  border: 1px solid var(--borde); border-radius: 999px; padding: 5px 10px;
+}
+.opciones-dibujo { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.opciones-dibujo .opcion { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.opciones-dibujo svg { max-height: 120px; max-width: 100%; height: auto; }
+.opciones-par { grid-template-columns: 1fr 1fr; }
+.opciones-par .opcion { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; font-size: 1.05rem; }
+.opcion code { font-size: 1rem; color: var(--suave); }
+.fxLetra { font-size: .72rem; font-weight: 700; letter-spacing: .08em; color: var(--suave); }
+.tabla-grupos { border-collapse: collapse; width: 100%; font-size: .84rem; }
+.tabla-grupos th { text-align: left; color: var(--suave); font-weight: 600; padding: 4px 6px; border-bottom: 2px solid var(--borde); }
+.tabla-grupos td { padding: 6px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+.tabla-grupos small { color: var(--suave); }
 
 /* ───────────── Isómeros ───────────── */
 .encontrados h3 { margin-top: 18px; }

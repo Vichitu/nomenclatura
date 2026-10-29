@@ -19,7 +19,7 @@
     sustituyentes: 'Sustituyentes', estructura: 'Piezas de la estructura', isomero: 'Posición en la estructura (isómero)',
     isomeros: 'Isómeros', estereo: 'Estereoquímica (R/S, E/Z)', triviales: 'Nombres triviales', otro: 'Otros',
   };
-  const MODOS_MAS = { triviales: 'Nombres triviales', cadena: 'Cadena principal', error: 'Encuentra el error', isomeros: 'Isómeros', estereo: 'Estereoquímica' };
+  const MODOS_MAS = { triviales: 'Nombres triviales', cadena: 'Cadena principal', grupos: 'Grupos funcionales', error: 'Encuentra el error', isomeros: 'Isómeros', estereo: 'Estereoquímica' };
   const ZONAS = ['editor', 'figura', 'respuesta', 'opciones', 'inicio', 'encontrados'];
   const BOTONES = { comprobar: '#btn-comprobar', pista: '#btn-pista', solucion: '#btn-solucion', siguiente: '#btn-siguiente' };
 
@@ -84,6 +84,12 @@
       Quimica.pintarEn($('#figura'), g, o);
     },
     figuraClicable: (si) => $('#figura').classList.toggle('clicable', !!si),
+    // Ajustes propios del modo (selects con data-ajuste) en la barra de herramientas.
+    ajustes(html) {
+      const a = $('#ajustes-modo');
+      a.innerHTML = html || '';
+      a.hidden = !html;
+    },
     explicacion(html) {
       const s = $('#explicacion');
       s.innerHTML = html;
@@ -246,6 +252,7 @@
     modo = MODOS[nombre];
     ctx.est = {};
     ctx.figuraClicable(false);
+    ctx.ajustes(null);
     document.querySelectorAll('[data-modo]').forEach((b) => {
       b.classList.toggle('activo', b.dataset.modo === nombre);
       b.setAttribute('aria-current', b.dataset.modo === nombre ? 'true' : 'false');
@@ -339,6 +346,7 @@
       modo.clicFigura(ctx, { x: p.x / figuraS, y: p.y / figuraS });
     });
     $('#z-opciones').addEventListener('click', (e) => { const b = e.target.closest('[data-opcion]'); if (b) modo.opcion?.(ctx, b.dataset.opcion, b); });
+    $('#ajustes-modo').addEventListener('change', (e) => { const s = e.target.closest('[data-ajuste]'); if (s) modo.ajuste?.(ctx, s.dataset.ajuste, s.value); });
     $('#z-inicio').addEventListener('click', (e) => { const b = e.target.closest('[data-accion]'); if (b) modo.accion?.(ctx, b.dataset.accion, b); });
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !$('#menu-mas').hidden) { abrirMenu(false); $('#btn-mas').focus(); }
