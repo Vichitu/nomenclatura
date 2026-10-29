@@ -50,6 +50,7 @@ const Editor = (() => {
 
     mover: { et: '✥ mover', grupo: 'Edición', titulo: 'Arrastra átomos para recolocarlos' },
     borrar: { et: '⌫ borrar', grupo: 'Edición', titulo: 'Clic en un átomo o enlace para borrarlo' },
+    cambiar: { et: '⇄ C/N/O/S', grupo: 'Edición', titulo: 'Clic en un átomo para cambiar su elemento (C → N → O → S → C). Útil para los anillos con heteroátomos' },
   };
 
   const ELEMENTOS = ['C', 'O', 'N', 'S', 'F', 'Cl', 'Br', 'I'];
@@ -224,6 +225,16 @@ const Editor = (() => {
       const h = this.herramienta;
       const T = HERRAMIENTAS[h];
       if (h === 'mover') return;
+      if (h === 'cambiar') {
+        if (toque?.tipo !== 'atomo') return;
+        const ciclo = ['C', 'N', 'O', 'S'];
+        const a = this.g.atoms[toque.i];
+        this._guardar();
+        a.el = ciclo[(ciclo.indexOf(a.el) + 1) % ciclo.length];
+        a.charge = 0;
+        this._cambio();
+        return;
+      }
       if (h === 'borrar') {
         if (!toque) return;
         this._guardar();

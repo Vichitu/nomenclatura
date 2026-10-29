@@ -7,6 +7,10 @@ basada en los apuntes del Tema 2: Química orgánica estructural.
 
 - **Nombre → Estructura:** dibuja la molécula con piezas a partir de su nombre.
 - **Estructura → Nombre:** escribe el nombre de la molécula dibujada.
+- **Nombres triviales:** las moléculas y grupos de la lámina «Algunos nombres triviales»,
+  para dibujarlos a partir del nombre y nombrarlos a partir del dibujo.
+- **Cadena principal:** marcar y numerar la cadena principal sobre el dibujo, y ordenar
+  grupos funcionales por prioridad.
 - **Encuentra el error:** decide qué regla incumple un nombre propuesto.
 - **Isómeros:** dibuja todos los isómeros de una fórmula molecular.
 - **Estereoquímica:** asigna R/S y E/Z.

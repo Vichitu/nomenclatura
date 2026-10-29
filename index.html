@@ -30,6 +30,8 @@
       <symbol id="i-pista" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></symbol>
       <symbol id="i-ojo" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
       <symbol id="i-ayuda" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+      <symbol id="i-triviales" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></symbol>
+      <symbol id="i-cadena" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
       <symbol id="i-temas" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></symbol>
     </defs>
   </svg>
@@ -57,10 +59,18 @@
         <div class="mas">
           <button class="modo modo-mas" id="btn-mas" aria-haspopup="true" aria-expanded="false" aria-controls="menu-mas">
             <span class="modo-icono"><svg class="icono"><use href="#i-mas"/></svg></span>
-            <span class="modo-texto"><b id="mas-titulo">Más ejercicios</b><small>Errores, isómeros, R/S…</small></span>
+            <span class="modo-texto"><b id="mas-titulo">Más ejercicios</b><small>Triviales, cadena principal, isómeros, R/S…</small></span>
             <svg class="icono flecha"><use href="#i-flecha"/></svg>
           </button>
           <div class="menu-mas" id="menu-mas" hidden>
+            <button class="opcion-menu" data-modo="triviales">
+              <svg class="icono"><use href="#i-triviales"/></svg>
+              <span><b>Nombres triviales</b><small>Tolueno, acetona, piridina, fenilo… de la lámina de los apuntes</small></span>
+            </button>
+            <button class="opcion-menu" data-modo="cadena">
+              <svg class="icono"><use href="#i-cadena"/></svg>
+              <span><b>Cadena principal</b><small>Marca y numera la cadena; ordena grupos por prioridad</small></span>
+            </button>
             <button class="opcion-menu" data-modo="error">
               <svg class="icono"><use href="#i-error"/></svg>
               <span><b>Encuentra el error</b><small>¿El nombre es correcto o qué regla incumple?</small></span>
@@ -178,7 +188,7 @@
     <section class="tarjeta bienvenida" role="dialog" aria-modal="true" aria-labelledby="bienvenida-titulo">
       <h2 id="bienvenida-titulo">¡Bienvenido/a! Así funciona</h2>
       <ol class="pasos-bienvenida">
-        <li><b>Elige qué practicar</b> arriba: dibujar a partir del nombre, nombrar lo que ves o hacer un repaso tipo examen. En «Más ejercicios» tienes errores, isómeros y estereoquímica.</li>
+        <li><b>Elige qué practicar</b> arriba: dibujar a partir del nombre, nombrar lo que ves o hacer un repaso tipo examen. En «Más ejercicios» tienes nombres triviales, cadena principal, errores, isómeros y estereoquímica.</li>
         <li><b>Si fallas, no pasa nada:</b> corrígelo y vuelve a comprobar, o pulsa «¿Por qué está mal?» para ver qué falla y cómo arreglarlo. La corrección aparece en el panel de la derecha.</li>
         <li><b>Elige los temas</b> con el botón «Temas»: el número de cada tema indica cuántas moléculas dominas.</li>
         <li><b>Tu progreso se guarda</b> en este navegador. Las moléculas que fallas vuelven a salir antes para que las repases.</li>
@@ -198,6 +208,8 @@
   <script src="js/modos/error.js"></script>
   <script src="js/modos/isomeros.js"></script>
   <script src="js/modos/estereo.js"></script>
+  <script src="js/modos/triviales.js"></script>
+  <script src="js/modos/cadena.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

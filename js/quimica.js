@@ -65,7 +65,7 @@ const Quimica = (() => {
       }
       const dos = s.slice(i, i + 2);
       if (dos === 'Cl' || dos === 'Br') { mapas.push(0); i += 2; continue; }
-      if ('BCNOPSFIbcnops'.includes(c)) mapas.push(0);
+      if ('BCNOPSFIbcnops*'.includes(c)) mapas.push(0);
       i++;
     }
     return mapas;
@@ -73,6 +73,8 @@ const Quimica = (() => {
 
   // ───────── Molfile ─────────
   const CARGA_V2000 = { 1: 3, 2: 2, 3: 1, 5: -1, 6: -2, 7: -3 };
+  // Átomo comodín (* en SMILES): el «resto de la molécula» de un grupo. Se dibuja como R.
+  const normalizarElemento = (el) => (/^(\*|R#?|A|Q)$/.test(el) ? 'R' : el);
 
   function leerMolblock(mb) {
     const L = mb.split(/\r?\n/);
@@ -85,7 +87,7 @@ const Quimica = (() => {
       atoms.push({
         x: parseFloat(l.slice(0, 10)),
         y: -parseFloat(l.slice(10, 20)),
-        el: l.slice(31, 34).trim(),
+        el: normalizarElemento(l.slice(31, 34).trim()),
         charge: CARGA_V2000[parseInt(l.slice(36, 39), 10)] || 0,
         map: 0,
       });
@@ -186,7 +188,7 @@ const Quimica = (() => {
   }
 
   // ───────── Grafo ─────────
-  const VALENCIAS = { C: [4], N: [3], O: [2], S: [2, 4, 6], P: [3, 5], F: [1], Cl: [1], Br: [1], I: [1], B: [3] };
+  const VALENCIAS = { R: [1], C: [4], N: [3], O: [2], S: [2, 4, 6], P: [3, 5], F: [1], Cl: [1], Br: [1], I: [1], B: [3] };
 
   function vecinos(g) {
     const adj = g.atoms.map(() => []);

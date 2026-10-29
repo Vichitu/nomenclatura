@@ -17,13 +17,14 @@
     localizadores: 'Numeración / localizadores', orden: 'Orden alfabético', cadena: 'Cadena principal',
     grupo: 'Grupo principal (sufijo)', guiones: 'Guiones y formato', antiguo: 'Localizadores en formato antiguo',
     sustituyentes: 'Sustituyentes', estructura: 'Piezas de la estructura', isomero: 'Posición en la estructura (isómero)',
-    isomeros: 'Isómeros', estereo: 'Estereoquímica (R/S, E/Z)', otro: 'Otros',
+    isomeros: 'Isómeros', estereo: 'Estereoquímica (R/S, E/Z)', triviales: 'Nombres triviales', otro: 'Otros',
   };
-  const MODOS_MAS = { error: 'Encuentra el error', isomeros: 'Isómeros', estereo: 'Estereoquímica' };
+  const MODOS_MAS = { triviales: 'Nombres triviales', cadena: 'Cadena principal', error: 'Encuentra el error', isomeros: 'Isómeros', estereo: 'Estereoquímica' };
   const ZONAS = ['editor', 'figura', 'respuesta', 'opciones', 'inicio', 'encontrados'];
   const BOTONES = { comprobar: '#btn-comprobar', pista: '#btn-pista', solucion: '#btn-solucion', siguiente: '#btn-siguiente' };
 
   let modo = null;
+  let figuraS = 44; // escala del último dibujo de #figura, para traducir clics a coordenadas
   let nombreModo = null;
   const sesion = { racha: 0, ok: 0, total: 0 };
   const recientes = [];
@@ -78,7 +79,11 @@
       if (window.matchMedia('(min-width: 760px)').matches) i.focus({ preventScroll: true });
       return v;
     },
-    pintarFigura: (g, o = {}) => Quimica.pintarEn($('#figura'), g, o),
+    pintarFigura(g, o = {}) {
+      figuraS = o.S || 44;
+      Quimica.pintarEn($('#figura'), g, o);
+    },
+    figuraClicable: (si) => $('#figura').classList.toggle('clicable', !!si),
     explicacion(html) {
       const s = $('#explicacion');
       s.innerHTML = html;
@@ -240,6 +245,7 @@
     nombreModo = nombre;
     modo = MODOS[nombre];
     ctx.est = {};
+    ctx.figuraClicable(false);
     document.querySelectorAll('[data-modo]').forEach((b) => {
       b.classList.toggle('activo', b.dataset.modo === nombre);
       b.setAttribute('aria-current', b.dataset.modo === nombre ? 'true' : 'false');
@@ -323,6 +329,15 @@
     $('#btn-ver-bienvenida').addEventListener('click', () => bienvenida(true));
     $('#respuesta').addEventListener('keydown', (e) => { if (e.key === 'Enter') modo.comprobar?.(ctx); });
     $('#feedback').addEventListener('click', (e) => { if (e.target.closest('[data-explicar]')) modo.explicar?.(ctx); });
+    $('#figura').addEventListener('click', (e) => {
+      if (!modo.clicFigura || !$('#figura').classList.contains('clicable')) return;
+      const svg = $('#figura');
+      const pt = svg.createSVGPoint();
+      pt.x = e.clientX;
+      pt.y = e.clientY;
+      const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+      modo.clicFigura(ctx, { x: p.x / figuraS, y: p.y / figuraS });
+    });
     $('#z-opciones').addEventListener('click', (e) => { const b = e.target.closest('[data-opcion]'); if (b) modo.opcion?.(ctx, b.dataset.opcion, b); });
     $('#z-inicio').addEventListener('click', (e) => { const b = e.target.closest('[data-accion]'); if (b) modo.accion?.(ctx, b.dataset.accion, b); });
     document.addEventListener('keydown', (e) => {

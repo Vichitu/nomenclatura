@@ -457,6 +457,25 @@ button:disabled { opacity: .45; cursor: default; }
 .fila-estereo > span { min-width: 220px; }
 .nota-estereo { margin: 8px 0 0; font-size: .9rem; color: var(--suave); }
 
+/* ───────────── Cadena principal ───────────── */
+.figura.clicable { cursor: pointer; }
+.figura-marco:has(.figura.clicable) { outline: 2px dashed color-mix(in srgb, var(--acento) 45%, transparent); outline-offset: -6px; }
+.num-usuario { fill: var(--acento); font-weight: 800; stroke: var(--panel-2); stroke-width: 3px; paint-order: stroke; }
+.separador { border: 0; border-top: 1px solid var(--borde); margin: 12px 0; }
+.orden-grupos { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.grupo-orden { display: grid; grid-template-columns: 36px 1fr; grid-template-rows: auto auto; align-items: center; column-gap: 10px; padding: 14px; text-align: left; }
+.orden-num {
+  grid-row: span 2; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
+  border: 2px dashed var(--borde-fuerte); font-weight: 800; color: var(--acento);
+}
+.grupo-orden.on .orden-num, .grupo-orden.correcta .orden-num, .grupo-orden.incorrecta .orden-num { border-style: solid; border-color: currentColor; }
+.grupo-orden.correcta .orden-num { color: var(--bien); }
+.grupo-orden.incorrecta .orden-num { color: var(--mal); }
+.orden-formula { font-size: 1.25rem; font-weight: 700; }
+.orden-nombre { color: var(--suave); font-size: .88rem; }
+.orden-resultado { margin: 8px 0 0; padding-left: 22px; }
+.orden-resultado li { margin: 4px 0; }
+
 /* ───────────── Isómeros ───────────── */
 .encontrados h3 { margin-top: 18px; }
 .rejilla-isomeros { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
