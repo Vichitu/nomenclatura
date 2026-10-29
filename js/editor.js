@@ -1,5 +1,6 @@
 // Editor de estructuras por piezas (fórmula lineoangular).
-// Clic en un átomo: une la pieza seleccionada. Clic en un enlace: cambia su orden.
+// Clic en un átomo: une la pieza seleccionada. Clic en un enlace: cambia su orden
+// (o, con las herramientas de cuña, su estereoquímica).
 // Arrastrar desde un átomo: crea un enlace nuevo (o lo cierra con otro átomo).
 'use strict';
 
@@ -25,6 +26,8 @@ const Editor = (() => {
 
     doble: { et: '=', grupo: 'Enlaces', titulo: 'Doble enlace: clic en un enlace para hacerlo doble', orden: 2, frag: frag([['C', 1, 0]], [[-1, 0, 2]]) },
     triple: { et: '≡', grupo: 'Enlaces', titulo: 'Triple enlace: clic en un enlace para hacerlo triple', orden: 3, frag: frag([['C', 1, 0]], [[-1, 0, 3]]) },
+    cuna: { et: '▲ cuña', grupo: 'Enlaces', titulo: 'Cuña (enlace hacia delante): clic en un enlace sencillo; otro clic la gira y otro la quita. Desde un átomo, añade un carbono en cuña', cuna: 1, frag: frag([['C', 1, 0]]) },
+    rayada: { et: '┅ rayada', grupo: 'Enlaces', titulo: 'Cuña rayada (enlace hacia atrás): clic en un enlace sencillo; otro clic la gira y otro la quita. Desde un átomo, añade un carbono en cuña rayada', cuna: 6, frag: frag([['C', 1, 0]]) },
 
     OH: { et: '–OH', grupo: 'Grupos', titulo: 'Hidroxilo', frag: frag([['O', 1, 0]]) },
     CO: { et: '=O', grupo: 'Grupos', titulo: 'Oxígeno con doble enlace (carbonilo)', frag: frag([['O', 1, 0]], [[-1, 0, 2]]) },
@@ -93,6 +96,16 @@ const Editor = (() => {
       this._cambio();
     }
     reiniciar() { this.historial = []; this.limpiar(false); }
+    // Sustituye el dibujo por el grafo g (en unidades de enlace), centrado en el lienzo.
+    cargar(g) {
+      if (!this.vacio()) this._guardar();
+      this.g = Quimica.copiar(g);
+      const xs = this.g.atoms.map((a) => a.x), ys = this.g.atoms.map((a) => a.y);
+      const dx = this.W / this.S / 2 - (Math.min(...xs) + Math.max(...xs)) / 2;
+      const dy = this.H / this.S / 2 - (Math.min(...ys) + Math.max(...ys)) / 2;
+      this.g.atoms.forEach((a) => { a.x += dx; a.y += dy; });
+      this._cambio();
+    }
     deshacer() {
       const prev = this.historial.pop();
       if (!prev) return;
@@ -205,6 +218,7 @@ const Editor = (() => {
         this._guardar();
         const j = dest.j != null ? dest.j : this._nuevoAtomo(ELEMENTOS.includes(h) ? h : 'C', dest.x, dest.y);
         this._enlazar(d.toque.i, j, orden);
+        if (HERRAMIENTAS[h].cuna) this._ponerCuna(d.toque.i, j, HERRAMIENTAS[h].cuna);
         this._cambio();
         return;
       }
@@ -243,12 +257,17 @@ const Editor = (() => {
         this._cambio();
         return;
       }
+      if (T.cuna) {
+        this._clicCuna(toque, T.cuna);
+        return;
+      }
       this._guardar();
       if (toque?.tipo === 'enlace') {
         const b = this.g.bonds[toque.i];
         if (T.anillo) this._fusionarAnillo(toque.i, T);
         else if (T.orden) b.order = b.order === T.orden ? 1 : T.orden;
         else b.order = (b.order % 3) + 1;
+        if (b.order !== 1) b.estereo = 0;
       } else if (toque?.tipo === 'atomo') {
         if (T.anillo) this._anilloUnido(toque.i, T);
         else this._unirFragmento(toque.i, T.frag);
@@ -290,6 +309,40 @@ const Editor = (() => {
       const b = this.g.bonds.find((x) => (x.a === i && x.b === j) || (x.a === j && x.b === i));
       if (b) { if (orden > 1) b.order = orden; return; }
       this.g.bonds.push({ a: i, b: j, order: orden });
+    }
+
+    // Cuñas: la punta estrecha va en el estereocentro (átomo a del enlace).
+    // Clic en un enlace sencillo: cuña → cuña girada → sin cuña.
+    _clicCuna(toque, tipo) {
+      if (toque?.tipo === 'atomo') {
+        this._guardar();
+        const antes = new Set(this.g.atoms.keys());
+        this._unirFragmento(toque.i, HERRAMIENTAS.C.frag);
+        const j = this.g.atoms.findIndex((_, k) => !antes.has(k));
+        if (j >= 0) this._ponerCuna(toque.i, j, tipo);
+        this._cambio();
+        return;
+      }
+      if (toque?.tipo !== 'enlace') return;
+      const b = this.g.bonds[toque.i];
+      if (b.order !== 1) return;
+      this._guardar();
+      const grado = (k) => this._vecinos(k).length;
+      const natural = grado(b.a) > grado(b.b) || (grado(b.a) === grado(b.b) && b.a < b.b);
+      if (b.estereo !== tipo) {
+        b.estereo = tipo;
+        if (!natural) [b.a, b.b] = [b.b, b.a];
+      } else if (natural) [b.a, b.b] = [b.b, b.a];
+      else b.estereo = 0;
+      this._cambio();
+    }
+
+    _ponerCuna(i, j, tipo) {
+      const b = this.g.bonds.find((x) => (x.a === i && x.b === j) || (x.a === j && x.b === i));
+      if (!b || b.order !== 1) return;
+      b.a = i;
+      b.b = j;
+      b.estereo = tipo;
     }
 
     _borrarAtomo(i) {

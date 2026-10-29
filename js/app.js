@@ -19,7 +19,7 @@
     sustituyentes: 'Sustituyentes', estructura: 'Piezas de la estructura', isomero: 'Posición en la estructura (isómero)',
     isomeros: 'Isómeros', estereo: 'Estereoquímica (R/S, E/Z)', triviales: 'Nombres triviales', otro: 'Otros',
   };
-  const MODOS_MAS = { triviales: 'Nombres triviales', cadena: 'Cadena principal', grupos: 'Grupos funcionales', error: 'Encuentra el error', isomeros: 'Isómeros', estereo: 'Estereoquímica' };
+  const MODOS_MAS = { triviales: 'Nombres triviales', cadena: 'Cadena principal', grupos: 'Grupos funcionales', error: 'Encuentra el error', isomeros: 'Isómeros', estereo: 'Estereoquímica', identificar: 'Identificar mi dibujo' };
   const ZONAS = ['editor', 'figura', 'respuesta', 'opciones', 'inicio', 'encontrados'];
   const BOTONES = { comprobar: '#btn-comprobar', pista: '#btn-pista', solucion: '#btn-solucion', siguiente: '#btn-siguiente' };
 
@@ -303,7 +303,10 @@
     Progreso.persistir();
 
     ctx.editor = new Editor.Editor($('#lienzo'), {
-      alCambiar: () => { if ($('#feedback').classList.contains('aviso')) ctx.feedback(''); },
+      alCambiar: () => {
+        if ($('#feedback').classList.contains('aviso')) ctx.feedback('');
+        modo?.cambioEditor?.(ctx);
+      },
     });
     pintarPaleta();
     pintarNiveles();

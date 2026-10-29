@@ -22,6 +22,7 @@
       <symbol id="i-error" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
       <symbol id="i-isomeros" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
       <symbol id="i-estereo" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+      <symbol id="i-identificar" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><polygon points="12 7 16.3 9.5 16.3 14.5 12 17 7.7 14.5 7.7 9.5"/></symbol>
       <symbol id="i-mas" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></symbol>
       <symbol id="i-flecha" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></symbol>
       <symbol id="i-racha" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
@@ -60,7 +61,7 @@
         <div class="mas">
           <button class="modo modo-mas" id="btn-mas" aria-haspopup="true" aria-expanded="false" aria-controls="menu-mas">
             <span class="modo-icono"><svg class="icono"><use href="#i-mas"/></svg></span>
-            <span class="modo-texto"><b id="mas-titulo">Más ejercicios</b><small>Triviales, cadena, grupos, isómeros, R/S…</small></span>
+            <span class="modo-texto"><b id="mas-titulo">Más ejercicios</b><small>Triviales, cadena, grupos, R/S, identificar…</small></span>
             <svg class="icono flecha"><use href="#i-flecha"/></svg>
           </button>
           <div class="menu-mas" id="menu-mas" hidden>
@@ -87,6 +88,10 @@
             <button class="opcion-menu" data-modo="estereo">
               <svg class="icono"><use href="#i-estereo"/></svg>
               <span><b>Estereoquímica</b><small>Asigna R/S y E/Z</small></span>
+            </button>
+            <button class="opcion-menu" data-modo="identificar">
+              <svg class="icono"><use href="#i-identificar"/></svg>
+              <span><b>Identificar mi dibujo</b><small>Dibuja lo que quieras y ve su nombre IUPAC al momento</small></span>
             </button>
           </div>
         </div>
@@ -194,7 +199,7 @@
     <section class="tarjeta bienvenida" role="dialog" aria-modal="true" aria-labelledby="bienvenida-titulo">
       <h2 id="bienvenida-titulo">¡Bienvenido/a! Así funciona</h2>
       <ol class="pasos-bienvenida">
-        <li><b>Elige qué practicar</b> arriba: dibujar a partir del nombre, nombrar lo que ves o hacer un repaso tipo examen. En «Más ejercicios» tienes nombres triviales, cadena principal, grupos funcionales, errores, isómeros y estereoquímica.</li>
+        <li><b>Elige qué practicar</b> arriba: dibujar a partir del nombre, nombrar lo que ves o hacer un repaso tipo examen. En «Más ejercicios» tienes nombres triviales, cadena principal, grupos funcionales, errores, isómeros, estereoquímica y «Identificar mi dibujo», que te da el nombre IUPAC de lo que dibujes.</li>
         <li><b>Si fallas, no pasa nada:</b> corrígelo y vuelve a comprobar, o pulsa «¿Por qué está mal?» para ver qué falla y cómo arreglarlo. La corrección aparece en el panel de la derecha.</li>
         <li><b>Elige los temas</b> con el botón «Temas»: el número de cada tema indica cuántas moléculas dominas.</li>
         <li><b>Tu progreso se guarda</b> en este navegador. Las moléculas que fallas vuelven a salir antes para que las repases.</li>
@@ -207,6 +212,7 @@
   <script src="js/moleculas.js"></script>
   <script src="js/quimica.js"></script>
   <script src="js/nombre.js"></script>
+  <script src="js/nombrador.js"></script>
   <script src="js/editor.js"></script>
   <script src="js/progreso.js"></script>
   <script src="js/modos/practica.js"></script>
@@ -217,6 +223,7 @@
   <script src="js/modos/triviales.js"></script>
   <script src="js/modos/cadena.js"></script>
   <script src="js/modos/grupos.js"></script>
+  <script src="js/modos/identificar.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

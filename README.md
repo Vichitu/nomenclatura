@@ -16,6 +16,9 @@ basada en los apuntes del Tema 2: Química orgánica estructural.
 - **Encuentra el error:** decide qué regla incumple un nombre propuesto.
 - **Isómeros:** dibuja todos los isómeros de una fórmula molecular.
 - **Estereoquímica:** asigna R/S y E/Z.
+- **Identificar mi dibujo:** dibuja cualquier molécula y su nombre IUPAC aparece
+  al momento, con el grupo principal, la cadena principal, la fórmula, la
+  estereoquímica (E/Z por el dibujo y R/S con las cuñas) y el nombre trivial si lo tiene.
 - **Repaso general:** examen de prueba con preguntas de todas las secciones.
 
 El progreso se guarda en el navegador de cada usuario (`localStorage`), con
@@ -31,6 +34,7 @@ a internet (la librería química RDKit.js se carga desde unpkg).
 - `js/moleculas.js` — banco de ejercicios (nombre + SMILES con la cadena numerada).
 - `js/quimica.js` — RDKit, grafo molecular y dibujo SVG.
 - `js/nombre.js` — análisis de nombres: partes, resaltado y diagnóstico de errores.
+- `js/nombrador.js` — genera el nombre IUPAC de una estructura dibujada.
 - `js/editor.js` — editor de estructuras por piezas.
 - `js/progreso.js` — progreso y repetición espaciada.
 - `js/modos/` — un archivo por modo de práctica.

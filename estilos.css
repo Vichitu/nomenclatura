@@ -639,3 +639,11 @@ button:disabled { opacity: .45; cursor: default; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
+
+/* ───────── Identificar mi dibujo ───────── */
+.id-espera { color: var(--suave); font-weight: 500; font-size: 1.1rem; letter-spacing: 0; }
+.id-ficha { display: grid; gap: 6px; }
+.id-fila { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.id-fila span { color: var(--suave); font-size: .9em; }
+.id-fila b { text-align: right; }
+.id-nota { margin: 10px 0 0; font-size: .88em; color: var(--suave); }

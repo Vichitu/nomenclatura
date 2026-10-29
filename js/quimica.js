@@ -116,7 +116,7 @@ const Quimica = (() => {
     g.atoms.forEach((a) => {
       L.push(`${a.x.toFixed(4).padStart(10)}${(-a.y).toFixed(4).padStart(10)}${'0.0000'.padStart(10)} ${a.el.padEnd(3)} 0  0  0  0  0  0  0  0  0  0  0  0`);
     });
-    g.bonds.forEach((b) => L.push(`${f(b.a + 1, 3)}${f(b.b + 1, 3)}${f(b.order, 3)}  0`));
+    g.bonds.forEach((b) => L.push(`${f(b.a + 1, 3)}${f(b.b + 1, 3)}${f(b.order, 3)}${f(b.estereo || 0, 3)}`));
     const cargas = g.atoms.map((a, i) => [i + 1, a.charge || 0]).filter((x) => x[1]);
     for (let k = 0; k < cargas.length; k += 8) {
       const p = cargas.slice(k, k + 8);
